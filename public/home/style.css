@@ -1,0 +1,43 @@
+.agent-option {
+    height: 23px;
+    width: 100%;
+    font-size: 14px;
+    margin: 4px 0px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.store-option {
+    height: 23px;
+    width: 100%;
+    font-size: 14px;
+    margin: 4px 0px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.transtype-option {
+    height: 30px;
+    width: 100%;
+    font-size: 14px;
+    margin: 4px 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.transcurrency-option {
+    height: 23px;
+    width: 100%;
+    font-size: 14px;
+    margin: 4px 0px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}

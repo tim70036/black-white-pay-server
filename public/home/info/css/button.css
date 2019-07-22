@@ -1,0 +1,19 @@
+
+.btn-group {
+    display : inline !important;
+}
+
+.table-btn {
+    margin-top: 0.5em;
+    margin-left: 0.3em !important;
+}
+
+#createFormButton {
+    background-color:  #2eb8b8;
+    border-color:  #2eb8b8;
+}
+
+#createFormButton:hover {
+    background-color: #47d1d1;
+    border-color: #47d1d1;
+}

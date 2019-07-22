@@ -1,0 +1,33 @@
+# Credential
+configs
+.env
+*.env
+
+# OS X
+.DS_Store*
+Icon?
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+*~
+
+
+# npm
+node_modules
+package-lock.json
+*.log
+*.gz
+*.zip
+
+
+# Coveralls
+coverage
+
+# Benchmarking
+benchmarks/graphs

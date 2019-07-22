@@ -1,0 +1,310 @@
+{{!-- Import custom stylesheet to layout --}}
+{{#section 'css'}}
+    <link href="/home/assets/vendors/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
+	<link href="/home/personnel/css/button.css" rel="stylesheet" type="text/css" />
+    <link href="/home/style.css" rel="stylesheet" type="text/css" />
+	
+{{/section}}
+{{!-- Import custom script to layout --}}
+{{#section 'js'}}
+	<script src="/home/personnel/js/agent.js" type="text/javascript"></script>
+	<script src="/home/assets/vendors/custom/datatables/datatables.bundle.js" type="text/javascript"></script>
+
+	<script>
+		var stores = [
+			{{#each stores}}
+				{ 
+					id : '{{account}}',
+					text : '{{name}}',
+					html :  '<span class="store-option">' + 
+                                '{{name}} &nbsp;  (<span class="m--font-bold m--font-primary">{{account}}</span>)' +         
+                            '</span>',
+					title : '{{name}}',
+				}, 
+			{{/each}}
+		];
+
+		var tableButtons = [
+                { 
+					text: '<i class="fa fa-user-edit"></i> <span>編輯選取</span>',
+					attr: {
+						id: 'editButton',
+						class: 'table-btn btn btn-outline-primary m-btn m-btn--custom m-btn--icon m-btn--bolder',
+					},
+                },
+
+                {{#if user.isAdmin}}
+					{
+						text: '<i class="fa fa-user-slash"></i> <span>刪除選取</span>',
+						attr: {
+							id: 'deleteButton',
+							class: 'table-btn btn btn-danger m-btn m-btn--custom m-btn--icon  m-btn--bolder ',
+						},
+					},
+				{{/if}}
+
+				{ 
+					text: '<i class="fa fa-save"></i> <span>保存變更</span>', 
+					attr: {
+						id: 'saveButton',
+                        class: 'table-btn btn btn-outline-success m-btn m-btn--custom m-btn--icon m-btn--bolder',
+                        style: "display:none;",
+					},	
+                },
+				{ 	
+					text: '<i class="fa fa-walking"></i> <span>離開編輯</span>', 
+					attr: {
+						id: 'cancelButton',
+						class: 'table-btn btn btn-outline-primary m-btn m-btn--custom m-btn--icon m-btn--bolder',
+						style: "display:none;",
+					},
+                },
+		];
+	</script>
+{{/section}}
+
+{{!-- Header goes here --}}
+<!-- BEGIN: Subheader -->
+<div class="m-subheader ">
+	<div class="d-flex align-items-center">
+		<div class="mr-auto">
+			<h3 class="m-subheader__title "></h3>
+		</div>
+	</div>
+</div>
+<!-- END: Subheader -->
+
+{{!-- Content goes here --}}
+<div class="m-content">
+	
+	<div class="m-portlet m-portlet--mobile">
+		<div class="m-portlet__head">
+			<div class="m-portlet__head-caption">
+				<div class="m-portlet__head-title">
+					<h2 class="m-portlet__head-text">
+						代理商查詢
+					</h2>
+				</div>
+			</div>  
+			<div class="m-portlet__head-tools">
+				<ul class="m-portlet__nav">
+					<li class="m-portlet__nav-item">
+						<button  id="createFormButton" data-toggle="modal" data-target="#create-modal" type="button" class="btn btn-accent m-btn m-btn--custom m-btn--icon m-btn--bolder">
+							<span>
+								<i class="fa fa-user-plus"></i>
+								<span>新增代理</span>
+							</span>
+						</button>
+					</li>
+				</ur>
+			</div>
+		</div>
+		
+		<div class="m-portlet__body">
+			
+			<table class="table table-bordered table-hover nowrap " id="data-table">
+				<thead>
+					<tr>
+						<th class="dt-center">RecordId</th>		{{!-- 0 --}}                     
+                        <th class="dt-center">帳號</th>			{{!-- 1 --}}
+						<th class="dt-center">名稱</th>			{{!-- 2 --}}
+                        <th class="dt-center">聯盟幣</th>		{{!-- 3 --}}
+                        <th class="dt-center">所屬店家</th>		{{!-- 4 --}}
+                        <th class="dt-center">綁定碼</th>		{{!-- 5 --}}
+						<th class="dt-center">點數</th>		{{!-- 5 --}}
+						<th class="dt-center">信用額度</th>		{{!-- 6 --}}
+						<th class="dt-center">旗下庫存點數</th>	{{!-- 7 --}}
+						<th class="dt-center">旗下可用點數</th>	{{!-- 8 --}}
+						<th class="dt-center">狀態</th>			{{!-- 9 --}}
+						<th class="dt-center">備註</th>			{{!-- 10 --}}
+                        <th class="dt-center">信箱</th>			{{!-- 11 --}}
+                        <th class="dt-center">電話</th>			{{!-- 12 --}}
+						<th class="dt-center">最後更新時間</th>	{{!-- 13 --}}
+						<th class="dt-center">創立時間</th>		{{!-- 14 --}}
+					</tr>
+				</thead>
+			</table>
+
+		</div>
+	</div>
+
+	<!--begin::add Modal-->
+	<div class="modal fade" id="create-modal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg  modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<!--begin::Form-->
+				<form id="create-form" autocomplete="off" class="m-form m-form--state m-form--label-align-right">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">註冊代理商帳號</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+
+						<!--begin::Form Section-->
+						<div class="m-form__section m-form__section--first">
+							<div class="m-form__heading">
+								<h3 class="m-form__heading-title">帳號資訊:</h3>
+							</div>
+							<div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">代理名稱 *</label>
+								<div class="col-lg-10 m-form__group-sub">
+									<div class="m-input-icon m-input-icon--left">
+										<input name="name" type="text" class="form-control m-input" placeholder="請輸入名稱">
+										<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="flaticon-exclamation-2"></i></span></span>
+									</div>
+									<span class="m-form__help">此名稱為識別用 輸入後將無法更改</span>
+								</div>
+							</div>
+							<div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">代理帳號 *</label>
+								<div class="col-lg-10 m-form__group-sub">
+									<div class="m-input-icon m-input-icon--left">
+										<input name="account" type="text" class="form-control m-input" placeholder="請輸入帳號">
+										<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-user"></i></span></span>
+									</div>
+									<span class="m-form__help">該人員將使用此帳號登入 </span>
+								</div>
+							</div>
+							<div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">代理密碼 *</label>
+								<div class="col-lg-10 m-form__group-sub">
+									<div class="m-input-icon m-input-icon--left">
+										<input id="password" name="password" type="password" class="form-control m-input" placeholder="請輸入密碼" autocomplete="new-password">
+										<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-key"></i></span></span>
+									</div>
+									<span class="m-form__help">該人員將使用此密碼登入 </span>
+								</div>
+							</div>
+							<div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">確認密碼 *</label>
+								<div class="col-lg-10 m-form__group-sub">
+									<div class="m-input-icon m-input-icon--left">
+										<input name="passwordConfirm" type="password" class="form-control m-input" placeholder="請輸入相同密碼" autocomplete="new-password">
+										<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-key"></i></span></span>
+									</div>
+									<span class="m-form__help">請再次輸入密碼</span>
+								</div>
+							</div>
+							<div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">代理交易密碼 *</label>
+								<div class="col-lg-10 m-form__group-sub">
+									<div class="m-input-icon m-input-icon--left">
+										<input id="transPwd" name="transPwd" type="password" class="form-control m-input" placeholder="請輸入交易密碼" autocomplete="new-password">
+										<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-key"></i></span></span>
+									</div>
+									<span class="m-form__help">該人員將使用此密碼進行轉帳行為 </span>
+								</div>
+							</div>
+							<div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">確認交易密碼 *</label>
+								<div class="col-lg-10 m-form__group-sub">
+									<div class="m-input-icon m-input-icon--left">
+										<input name="transPwdConfirm" type="password" class="form-control m-input" placeholder="請輸入相同交易密碼" autocomplete="new-password">
+										<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-key"></i></span></span>
+									</div>
+									<span class="m-form__help">請再次輸入交易密碼</span>
+								</div>
+							</div>
+						</div>
+						<!--end::Form Section-->
+
+						<!--begin::Form Section-->
+						<div class="m-form__section m-form__section">
+							<div class="m-form__heading">
+								<h3 class="m-form__heading-title">帳務資訊:</h3>
+							</div>
+							<div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">店家 *</label>
+								<div class="col-lg-10 m-form__group-sub">
+									<select class="form-control m-select2 m-input" id="stores" name="storeAccount">
+										<option></option> {{!--  placeholder --}}
+									</select>
+								</div>
+							</div>
+                            <div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">綁定碼 *</label>
+								<div class="col-lg-10 m-form__group-sub">
+									<div class="input-group">
+										<input name="bindingCode" type="text" class="form-control m-input" placeholder="請輸入綁定碼">
+									</div>
+								</div>
+							</div>
+							<div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">點數 *</label>
+								<div class="col-lg-4 m-form__group-sub">
+									<div class="input-group">
+										<input name="cash" type="text" class="form-control m-input" placeholder="請輸入點數">
+										<div class="input-group-append"><span class="input-group-text">$</span></div>
+									</div>
+									<span class="m-form__help"> </span>
+								</div>
+								<label class="col-lg-2 col-form-label">信用額度 *</label>
+								<div class="col-lg-4 m-form__group-sub">
+									<div class="input-group">
+										<input name="credit" type="text" class="form-control m-input" placeholder="請輸入信用額度">
+										<div class="input-group-append"><span class="input-group-text">$</span></div>
+									</div>
+									<span class="m-form__help"> </span>
+								</div>
+							</div>
+						</div>
+						<!--end::Form Section-->
+
+						<!--begin::Form Section-->
+						
+						<!--end::Form Section-->
+
+						<!--begin::Form Section-->
+						<div class="m-form__section m-form__section--last">
+							<div class="m-form__heading">
+								<h3 class="m-form__heading-title">其它資訊:</h3>
+							</div>
+                            <div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">信箱 </label>
+								<div class="col-lg-10 m-form__group-sub">
+									<div class="m-input-icon m-input-icon--left">
+										<input id="email" name="email" type="text" class="form-control m-input" placeholder="請輸入email">
+										<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-envelope"></i></span></span>
+									</div>
+									<span class="m-form__help"> </span>
+								</div>
+							</div>
+							<div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">電話號碼 </label>
+								<div class="col-lg-4 m-form__group-sub">
+									<div class="m-input-icon m-input-icon--right">
+										<input name="phoneNumber" type="text" class="form-control m-input" placeholder="請輸入電話">
+										<span class="m-input-icon__icon m-input-icon__icon--right"><span><i class="fa fa-phone"></i></span></span>
+									</div>
+									<span class="m-form__help"> </span>
+								</div>
+							</div>
+							<div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">備註 </label>
+								<div class="col-lg-10 m-form__group-sub">
+									​<textarea name="comment" class="form-control m-input" rows="3"></textarea>
+								</div>
+								<span class="m-form__help"> </span>
+							</div>
+						</div>
+						<!--end::Form Section-->
+	
+					</div>
+					<div class="modal-footer">
+						<div class="row">
+							<div class="col m--align-right">
+								<button id="createButton" type="submit" class="btn m-btn--square  btn-primary m-btn m-btn--custom  ">確定新增</button>
+								<button type="button" class="btn m-btn--square  btn-secondary m-btn m-btn--custom" data-dismiss="modal">取消</button>
+							</div>
+						</div>
+					</div>
+				</form>
+				<!--end::Form-->
+			</div>
+		</div>
+	</div>
+	<!--end::add Modal-->
+</div>
+

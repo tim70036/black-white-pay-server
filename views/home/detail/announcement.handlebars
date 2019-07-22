@@ -1,0 +1,113 @@
+{{!-- Import custom stylesheet to layout --}}
+{{#section 'css'}}
+<link href="/home/assets/vendors/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
+<link href="/home/assets/vendors/summernote/summernote.css" rel="stylesheet">
+<link href="/home/info/css/button.css" rel="stylesheet" type="text/css" />
+<link href="/home/detail/css/imageReader.css" rel="stylesheet" type="text/css" />
+
+{{/section}}
+{{!-- Import custom script to layout --}}
+{{#section 'js'}}
+<script src="/home/assets/vendors/custom/datatables/datatables.bundle.js" type="text/javascript"></script>
+<script src="/home/assets/vendors/summernote/summernote.min.js" type="text/javascript"></script>
+<script src="/home/assets/vendors/summernote/lang/summernote-zh-TW.js" type="text/javascript"></script>
+<script src="/home/detail/js/announcement.js" type="text/javascript"></script>
+<script src="/home/detail/js/jquery.imagereader-1.1.0.js"></script>
+
+<script>
+    function decodeHtml(html) {
+        var txt = document.createElement("textarea");
+        txt.innerHTML = html;
+        return txt.value;
+    }
+
+
+
+    var announcementData = {
+        id: '{{{announcement.id}}}',
+        title: decodeHtml('{{{announcement.title}}}'),
+        url: '{{{announcement.imageSrc}}}',
+    }
+</script>
+{{/section}}
+
+{{!-- Header goes here --}}
+<!-- BEGIN: Subheader -->
+<div class="m-subheader ">
+    <div class="d-flex align-items-center">
+        <div class="mr-auto">
+            <h3 class="m-subheader__title "></h3>
+        </div>
+    </div>
+</div>
+<!-- END: Subheader -->
+
+{{!-- Content goes here --}}
+<div class="m-content">
+
+    <!--begin::Portlet-->
+    <div id="announcement-portlet" class="m-portlet m-portlet--tabs  m-portlet--mobile">
+        <div class="m-portlet__head">
+            <div class="m-portlet__head-caption">
+                <div class="m-portlet__head-title">
+                    <h2 class="m-portlet__head-text">
+                        公告詳細資訊
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="m-portlet__body">
+            <!--begin::Form-->
+            <form id="announcement-form" autocomplete="off" class="m-form m-form--state m-form--label-align-right">
+
+                <input id="id" name="id" type="hidden">
+
+                <div class="form-group m-form__group row">
+                    <label class="col-form-label col-lg-3 col-sm-12">公告標題 *</label>
+                    <div class="col-lg-6 col-md-10 col-sm-12 m-form__group-sub">
+                        <div class="m-input-icon m-input-icon--left">
+                            <input id="title" name="title" type="text" class="form-control m-input" placeholder="請輸入標題">
+                            <span class="m-input-icon__icon m-input-icon__icon--left"><span><i
+                                        class="flaticon-exclamation-2"></i></span></span>
+                        </div>
+                        <span class="m-form__help"></span>
+                    </div>
+                </div>
+
+                <div class="form-group m-form__group row">
+                    <label class="col-form-label col-lg-3 col-sm-12">公告圖 *</label>
+                    <div class="col-lg-6 col-md-10 col-sm-12 m-form__group-sub">
+                        {{!-- <textarea key="" id="announcementImg" name="announcementImg" class="form-control m-input"></textarea> --}}
+                        <div class="container">
+                            <div class="drop">
+                                <div class="uploader">
+                                    <label class="drop-label">Drag and drop images here</label>
+                                    <input type="file" class="image-upload" id="photo" name="photo" accept="image/*">
+                                </div>
+                                <div id="image-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="m-form__help"> </span>
+                </div>
+
+                <div class="m-portlet__foot m-portlet__foot--fit">
+                    <div class="m-form__actions m-form__actions">
+                        <div class="row">
+                            <div class="col-lg-3 col-sm-12"></div>
+                            <div class="col-lg-6 col-md-10 col-sm-12 m--align-center">
+                                <button id="submit-btn" type="submit" class="btn m-btn--square  btn-primary m-btn m-btn--custom  ">確認更新</button>
+                                <button id="reset-btn" type="reset" class="m_reset btn m-btn--square  btn-secondary m-btn m-btn--custom">清空欄位</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <!--end::Form-->
+        </div>
+    </div>
+
+    <!--end::Portlet-->
+</div>

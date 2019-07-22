@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<!-- begin::Head -->
+	<head>
+		<meta charset="utf-8" />
+		<title>GSWallet</title>
+		<meta name="description" content="GSWallet">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
+
+		<!--begin::Web font -->
+		<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js"></script>
+		<script>
+			WebFont.load({
+            google: {"families":["Poppins:300,400,500,600,700","Roboto:300,400,500,600,700","Asap+Condensed:500"]},
+            active: function() {
+                sessionStorage.fonts = true;
+            }
+          });
+        </script>
+		{{!-- Google Font : Noto Sans TC --}}
+		<style>
+			@import url(https://fonts.googleapis.com/css?family=Noto+Sans+TC);
+			body {
+				font-family: 'Noto Sans TC', sans-serif !important;
+			}
+
+		</style>
+		<!--end::Web font -->
+
+		<!--begin::Global Theme Styles -->
+		<link href="/home/assets/vendors/base/vendors.bundle.css" rel="stylesheet" type="text/css" />
+		<!--RTL version:<link href="assets/vendors/base/vendors.bundle.rtl.css" rel="stylesheet" type="text/css" />-->
+		<link href="/home/assets/demo/demo12/base/style.bundle.css" rel="stylesheet" type="text/css" />
+		<!--RTL version:<link href="assets/demo/demo8/base/style.bundle.rtl.css" rel="stylesheet" type="text/css" />-->
+		<!--end::Global Theme Styles -->
+		<link rel="shortcut icon" href="/home/assets/img/logo/ff_favicon.ico" />
+
+		<!--begin::Page Theme Styles  -->
+		{{{_sections.css}}}
+		<!--end::Page Theme Styles -->
+
+		
+	</head>
+
+	<!-- end::Head -->
+
+	<!-- begin::Body -->
+	<body class="m-page--fluid m--skin- m-content--skin-light2 m-header--fixed m-header--fixed-mobile m-aside-left--enabled m-aside-left--skin-dark m-aside-left--offcanvas m-footer--push m-aside--offcanvas-default">
+
+		<!-- begin::Page loader -->
+		<div class="m-page-loader m-page-loader--base">
+			<div class="m-blockui">
+				<span>Please wait...</span>
+				<span>
+					<div class="m-loader m-loader--brand"></div>
+				</span>
+			</div>
+		</div>
+
+		<!-- end::Page Loader -->
+
+		<!-- begin:: Page -->
+		<div class="m-grid m-grid--hor m-grid--root m-page">
+
+			<!-- begin::Header -->
+			<header id="m_header" class="m-grid__item    m-header " m-minimize-offset="200" m-minimize-mobile-offset="200">
+					<div class="m-container m-container--fluid m-container--full-height">
+						<div class="m-stack m-stack--ver m-stack--desktop">
+
+							<!-- begin::Brand -->
+							<div class="m-stack__item m-brand  m-brand--skin-dark ">
+								<div class="m-stack m-stack--ver m-stack--general">
+									<div class="m-stack__item m-stack__item--middle m-brand__logo">
+										<a href="/" class="m-brand__logo-wrapper">
+											<img alt="" src="/home/assets/img/logo/ff_logo.png" class="m-brand__logo-default" />
+											<img alt="" src="" class="m-brand__logo-inverse" />
+										</a>
+									</div>
+									<div class="m-stack__item m-stack__item--middle m-brand__tools">
+
+										<!-- begin::Responsive Header Menu Toggler-->
+										<a href="javascript:;" id="m_aside_left_minimize_toggle" class="m-brand__icon m-brand__toggler m-brand__toggler--left m--visible-desktop-inline-block  ">
+											<span></span>
+										</a>
+
+										<!-- end::Responsive Header Menu Toggler-->
+
+										<!-- begin::Topbar Toggler-->
+										<a href="javascript:;" id="m_aside_left_offcanvas_toggle" class="m-brand__icon m-brand__toggler m-brand__toggler--left m--visible-tablet-and-mobile-inline-block">
+											<span></span>
+										</a>
+
+										<a id="m_aside_header_topbar_mobile_toggle" href="javascript:;" class="m-brand__icon m--visible-tablet-and-mobile-inline-block">
+											<i class="flaticon-more"></i>
+										</a>
+
+										<!--end::Topbar Toggler-->
+									</div>
+								</div>
+							</div>
+
+							<!-- end::Brand -->
+
+							
+
+							<!-- begin::Topbar -->
+							<div class="m-stack__item m-stack__item--fluid m-header-head" id="m_header_nav">
+								<div id="m_header_topbar" class="m-topbar  m-stack m-stack--ver m-stack--general">
+									<div class="m-stack__item m-topbar__nav-wrapper">
+										<ul class="m-topbar__nav m-nav m-nav--inline">
+											
+											
+											<li class="m-nav__item m-topbar__user-profile  m-dropdown m-dropdown--medium m-dropdown--arrow  m-dropdown--align-right m-dropdown--mobile-full-width m-dropdown--skin-light" m-dropdown-toggle="click">
+												{{!-- Topbar user section --}}
+												{{#if user}}
+												<a href="#" class="m-nav__link m-dropdown__toggle">
+													{{!-- Choose what to show, add 'm--hide' to hide --}}
+													{{!-- 1 --}}
+													<span class="m-topbar__userpic ">
+														<img src={{user.thumbnail}} width="42" height="42" class="m--img-rounded m--marginless m--img-centered" alt="" />
+													</span>
+													{{!-- 2 --}}
+													<span class="m-nav__link-icon m--hide"><span class="m-nav__link-icon-wrapper"><i class="flaticon-user"> </i></span></span>
+													
+													&nbsp;&nbsp;
+
+													{{!-- 3 --}}
+													<span class="m-topbar__username">{{user.name}} </span>
+												</a>
+
+												<div class="m-dropdown__wrapper">
+												<span class="m-dropdown__arrow m-dropdown__arrow--right m-dropdown__arrow--adjust"></span>
+												<div class="m-dropdown__inner">
+
+													<div class="m-dropdown__header m--align-center">
+														<div class="m-card-user m-card-user--skin-light">
+															<div class="m-card-user__pic">
+																<img src={{user.thumbnail}} width="42" height="42" class="m--img-rounded m--marginless" alt="" />
+															</div>
+															<div class="m-card-user__details">
+																<span class="m-card-user__name m--font-weight-500"> {{user.name}}({{user.roleName}})</span>
+																<a href="" class="m-card-user__email m--font-weight-300 m-link"> {{user.email}} </a>
+															</div>
+														</div>
+
+													</div>
+													<div class="m-dropdown__body">
+														<div class="m-dropdown__content">
+															<ul class="m-nav m-nav--skin-light">
+																<li class="m-nav__item">
+																	<a href="/home/dashboard" class="m-nav__link">
+																		<i class="m-nav__link-icon fa fa-info-circle"></i>
+																		<span class="m-nav__link-text">基本資訊</span>
+																	</a>
+																</li>
+																<li class="m-nav__separator m-nav__separator--fit"></li>
+																<li class="m-nav__item">
+																	<a href="/home/credit/history" class="m-nav__link">
+																		<i class="m-nav__link-icon fa fa-wallet"></i>
+																		<span class="m-nav__link-text">寶石記錄</span>
+																	</a>
+																</li>
+																<li class="m-nav__separator m-nav__separator--fit"></li>
+																<li class="m-nav__separator m-nav__separator--fit">
+																</li>
+																<li class="m-nav__item">
+																	<a href="/home/auth/logout" class="btn m-btn--pill  btn-secondary m-btn m-btn--custom m-btn--label-brand m-btn--bolder">登出</a>
+																</li>
+															</ul>
+														</div>
+													</div>
+												</div>
+												</div>
+												{{/if}}
+											</li>
+									
+										</ul>
+									</div>
+								</div>
+							</div>
+
+							<!-- end::Topbar -->
+   
+						</div>
+					</div>
+				</header>
+
+				<div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body">
+
+				<!-- BEGIN: Left Aside -->
+					<button class="m-aside-left-close  m-aside-left-close--skin-dark " id="m_aside_left_close_btn"><i class="la la-close"></i></button>
+					<div id="m_aside_left" class="m-grid__item	m-aside-left  m-aside-left--skin-dark ">
+
+						<!-- BEGIN: Aside Menu -->
+						<div id="m_ver_menu" class="m-aside-menu  m-aside-menu--skin-dark m-aside-menu--submenu-skin-dark " m-menu-vertical="1" m-menu-scrollable="0" m-menu-dropdown-timeout="500">
+							<ul class="m-menu__nav ">
+
+
+								<li id="index-tag" class="m-menu__item m-menu--active" aria-haspopup="true">
+									<a href="/" class="m-menu__link ">
+										<span class="m-menu__item-here"></span>
+										<i class="m-menu__link-icon fa fa-info-circle"></i>
+										<span class="m-menu__link-text">基本資訊</span>
+									</a>
+								</li>
+										
+										{{#if user.isAdmin}}
+											<li id="personnel-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">人員管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+                                                        <li id="personnel-user-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/personnel/user/" class="m-menu__link "><i class="m-menu__link-icon fa fa-user-friends"></i><span class="m-menu__link-text">用戶管理</span></a></li>
+													    <li id="personnel-member-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/personnel/member/" class="m-menu__link "><i class="m-menu__link-icon fa fa-user-friends"></i><span class="m-menu__link-text">會員管理</span></a></li>
+														<li id="personnel-agent-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/personnel/agent/" class="m-menu__link "><i class="m-menu__link-icon fa fa-user-tie"></i><span class="m-menu__link-text">代理商管理</span></a></li>
+														<li id="personnel-store-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/personnel/store/" class="m-menu__link "><i class="m-menu__link-icon fa fa-user-tie"></i><span class="m-menu__link-text">店家管理</span></a></li>
+													</ul>
+												</div>
+											</li>
+											<li id="storeCurrency-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">寶石管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="storeCurrency-transfer-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/storeCurrency/transfer/" class="m-menu__link "><i class="m-menu__link-icon fa fa-exchange-alt"></i><span class="m-menu__link-text">轉帳</span></a></li>
+														<li id="storeCurrency-history-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/storeCurrency/history/" class="m-menu__link "><i class="m-menu__link-icon fa fa-wallet"></i><span class="m-menu__link-text">紀錄</span></a></li>
+													</ul>
+												</div>
+											</li>
+											<li id="mainCurrency-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">聯盟幣管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="mainCurrency-transfer-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/mainCurrency/transfer/" class="m-menu__link "><i class="m-menu__link-icon fa fa-exchange-alt"></i><span class="m-menu__link-text">轉帳</span></a></li>
+                                                        <li id="mainCurrency-exchange-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/mainCurrency/exchange/" class="m-menu__link "><i class="m-menu__link-icon fa fa-exchange-alt"></i><span class="m-menu__link-text">轉換</span></a></li>
+														<li id="mainCurrency-history-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/mainCurrency/history/" class="m-menu__link "><i class="m-menu__link-icon fa fa-wallet"></i><span class="m-menu__link-text">轉帳紀錄</span></a></li>
+														<li id="mainCurrency-exchangeHistory-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/mainCurrency/exchange-history/" class="m-menu__link "><i class="m-menu__link-icon fa fa-wallet"></i><span class="m-menu__link-text">轉換紀錄</span></a></li>
+														{{!-- <li id="mainCurrency-config-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/credit/confirm/" class="m-menu__link "><i class="m-menu__link-icon fa fa-info"></i><span class="m-menu__link-text">設定</span></a></li> --}}
+													</ul>
+												</div>
+											</li>
+											<li id="report-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">報表管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="report-expenditure-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/report/expenditure/" class="m-menu__link "><i class="m-menu__link-icon fa fa-exchange-alt"></i><span class="m-menu__link-text">收支查詢</span></a></li>
+													</ul>
+												</div>
+											</li>	
+											<li id="info-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">資訊管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="info-announcement-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/info/announcement/" class="m-menu__link "><i class="m-menu__link-icon fa fa-comment-alt"></i><span class="m-menu__link-text">公告管理</span></a></li>
+                                                        <li id="info-notification-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/info/notification/" class="m-menu__link "><i class="m-menu__link-icon fa fa-comment-alt"></i><span class="m-menu__link-text">推播管理</span></a></li>
+													</ul>
+												</div>
+											</li>
+											<li id="account-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">帳號設定</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="account-misc-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/account/misc/" class="m-menu__link "><i class="m-menu__link-icon fab fa-whmcs"></i><span class="m-menu__link-text">一般設定</span></a></li>
+														{{!-- <li id="account-retrieve-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/account/retrieve/" class="m-menu__link "><i class="m-menu__link-icon fa fa-user-cog"></i><span class="m-menu__link-text">找回密碼</span></a></li> --}}
+													</ul>
+												</div>
+											</li>
+										{{/if}}
+
+										
+										{{#if user.isStore}}
+											
+											<li id="personnel-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">人員管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="personnel-member-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/personnel/member/" class="m-menu__link "><i class="m-menu__link-icon fa fa-user-friends"></i><span class="m-menu__link-text">會員管理</span></a></li>
+														<li id="personnel-agent-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/personnel/agent/" class="m-menu__link "><i class="m-menu__link-icon fa fa-user-tie"></i><span class="m-menu__link-text">代理商管理</span></a></li>
+													</ul>
+												</div>
+											</li>
+											<li id="storeCurrency-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">寶石管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="storeCurrency-transfer-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/storeCurrency/transfer/" class="m-menu__link "><i class="m-menu__link-icon fa fa-exchange-alt"></i><span class="m-menu__link-text">轉帳</span></a></li>
+														<li id="storeCurrency-history-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/storeCurrency/history/" class="m-menu__link "><i class="m-menu__link-icon fa fa-wallet"></i><span class="m-menu__link-text">紀錄</span></a></li>
+                                                        <li id="storeCurrency-autoTransfer-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/storeCurrency/autoTransfer/" class="m-menu__link "><i class="m-menu__link-icon fa fa-file-excel"></i><span class="m-menu__link-text">自動轉帳</span></a></li>
+													</ul>
+												</div>
+											</li>
+											<li id="mainCurrency-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">聯盟幣管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="mainCurrency-exchangeHistory-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/mainCurrency/exchange-history/" class="m-menu__link "><i class="m-menu__link-icon fa fa-wallet"></i><span class="m-menu__link-text">會員轉換紀錄</span></a></li>
+													</ul>
+												</div>
+											</li>
+											<li id="report-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">報表管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="report-expenditure-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/report/expenditure/" class="m-menu__link "><i class="m-menu__link-icon fa fa-exchange-alt"></i><span class="m-menu__link-text">收支管理</span></a></li>
+													</ul>
+												</div>
+											</li>
+											<li id="info-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">資訊管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+                                                        <li id="info-ad-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/info/ad/" class="m-menu__link "><i class="m-menu__link-icon fa fa-comment-alt"></i><span class="m-menu__link-text">廣告管理</span></a></li>
+                                                    </ul>
+												</div>
+        
+											</li>
+											<li id="account-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">帳號設定</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="account-misc-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/account/misc/" class="m-menu__link "><i class="m-menu__link-icon fab fa-whmcs"></i><span class="m-menu__link-text">一般設定</span></a></li>
+														{{!-- <li id="account-retrieve-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/account/retrieve/" class="m-menu__link "><i class="m-menu__link-icon fa fa-user-cog"></i><span class="m-menu__link-text">找回密碼</span></a></li> --}}
+													</ul>
+												</div>
+											</li>
+										{{/if}}
+
+										{{#if user.isAgent}}
+											<li id="personnel-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">人員管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="personnel-member-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/personnel/member/" class="m-menu__link "><i class="m-menu__link-icon fa fa-user-friends"></i><span class="m-menu__link-text">會員管理</span></a></li>
+													</ul>
+												</div>
+											</li>
+											<li id="storeCurrency-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">寶石管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="storeCurrency-transfer-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/storeCurrency/transfer/" class="m-menu__link "><i class="m-menu__link-icon fa fa-exchange-alt"></i><span class="m-menu__link-text">轉帳</span></a></li>
+														<li id="storeCurrency-history-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/storeCurrency/history/" class="m-menu__link "><i class="m-menu__link-icon fa fa-wallet"></i><span class="m-menu__link-text">紀錄</span></a></li>
+													</ul>
+												</div>
+											</li>
+                                            <li id="mainCurrency-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">聯盟幣管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="mainCurrency-exchangeHistory-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/mainCurrency/exchange-history/" class="m-menu__link "><i class="m-menu__link-icon fa fa-wallet"></i><span class="m-menu__link-text">會員轉換紀錄</span></a></li>
+													</ul>
+												</div>
+											</li>
+                                            <li id="report-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">報表管理</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="report-expenditure-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/report/expenditure/" class="m-menu__link "><i class="m-menu__link-icon fa fa-exchange-alt"></i><span class="m-menu__link-text">收支查詢</span></a></li>
+													</ul>
+												</div>
+											</li>	
+											<li id="account-tag" class="m-menu__item  m-menu__item--submenu m-menu__item--tabs" m-menu-submenu-toggle="tab" aria-haspopup="true"><a href="javascript:;" class="m-menu__link m-menu__toggle" title="Non functional dummy link"><span class="m-menu__link-text">帳號設定</span><i
+													class="m-menu__hor-arrow la la-angle-down"></i><i class="m-menu__ver-arrow la la-angle-right"></i></a>
+												<div class="m-menu__submenu m-menu__submenu--classic m-menu__submenu--left m-menu__submenu--tabs"><span class="m-menu__arrow m-menu__arrow--adjust"></span>
+													<ul class="m-menu__subnav">
+														<li id="account-misc-tag" class="m-menu__item " m-menu-link-redirect="1" aria-haspopup="true"><a href="/home/account/misc/" class="m-menu__link "><i class="m-menu__link-icon fab fa-whmcs"></i><span class="m-menu__link-text">一般設定</span></a></li>
+													</ul>
+												</div>
+											</li>
+										{{/if}}		
+					</ul>
+				</div>
+			</div>
+
+			<!-- end::Header -->
+
+			<!-- begin::Body -->
+			
+
+
+				<div class="m-grid__item m-grid__item--fluid m-wrapper">
+
+					{{{body}}}
+					
+				</div>
+			</div>
+
+			<!-- end::Body -->
+
+			<!-- begin::Footer -->
+			<footer class="m-grid__item		m-footer ">
+				<div class="m-container m-container--fluid m-container--full-height m-page__container">
+					<div class="m-stack m-stack--flex-tablet-and-mobile m-stack--ver m-stack--desktop">
+						<div class="m-stack__item m-stack__item--left m-stack__item--middle m-stack__item--last">
+							<span class="m-footer__copyright">
+								&copy; 2018-2019 放飞娱乐 版权所有
+							</span>
+						</div>
+					</div>
+				</div>
+			</footer>
+
+			<!-- end::Footer -->
+		</div>
+
+		<!-- end:: Page -->
+
+
+
+		<!-- begin::Scroll Top -->
+		<div id="m_scroll_top" class="m-scroll-top">
+			<i class="la la-arrow-up"></i>
+		</div>
+
+		<!-- end::Scroll Top -->
+
+
+		<!--begin::Global Theme Bundle -->
+		<script src="/home/assets/vendors/base/vendors.bundle.js" type="text/javascript"></script>
+		<script src="/home/assets/demo/demo12/base/scripts.bundle.js" type="text/javascript"></script>
+
+		<!--end::Global Theme Bundle -->
+
+		<!--begin::Page Script -->
+		{{{_sections.js}}}
+		<!--end::Page Script -->
+
+		<!-- begin::Page Loader -->
+		<script>
+			$(window).on('load', function() {
+				$('body').removeClass('m-page--loading');
+			});
+		</script>
+
+		<!-- end::Page Loader -->
+	</body>
+
+	<!-- end::Body -->
+
+	<script>
+        $(document).ready(function(){
+            var pathname = window.location.pathname;
+            //console.log(pathname);
+
+			{{#if user.isAdmin}}
+				var mappings = {
+					'/home/dashboard' : ['index-tag', 'index-dashboard-tag'],
+					'/home/dashboard/'  : ['index-tag', 'index-dashboard-tag'],
+
+                    '/home/personnel/user/' : ['personnel-tag', 'personnel-user-tag'],
+                    '/home/personnel/member/' : ['personnel-tag', 'personnel-member-tag'],
+					'/home/personnel/agent/' : ['personnel-tag', 'personnel-agent-tag'],
+					'/home/personnel/store/' : ['personnel-tag', 'personnel-store-tag'],
+					
+                    '/home/detail/announcement' : ['info-tag', 'info-announcement-tag'],
+
+					'/home/storeCurrency/transfer/' : ['storeCurrency-tag', 'storeCurrency-transfer-tag'],
+					'/home/storeCurrency/history/' : ['storeCurrency-tag', 'storeCurrency-history-tag'],
+					'/home/storeCurrency/confirm/' : ['storeCurrency-tag', 'storeCurrency-confirm-tag'],
+
+                    '/home/mainCurrency/transfer/' : ['mainCurrency-tag', 'mainCurrency-transfer-tag'],
+                    '/home/mainCurrency/exchange/' : ['mainCurrency-tag', 'mainCurrency-exchange-tag'],
+                    '/home/mainCurrency/history/' : ['mainCurrency-tag', 'mainCurrency-history-tag'],
+                    '/home/mainCurrency/exchange-history/' : ['mainCurrency-tag', 'mainCurrency-exchangeHistory-tag'],
+
+					'/home/report/expenditure/' : ['report-tag', 'report-expenditure-tag'],
+                    
+                    '/home/info/announcement/' : ['info-tag', 'info-announcement-tag'],
+                    '/home/info/notification/' : ['info-tag', 'info-notification-tag'],
+					
+					'/home/account/misc/' : ['account-tag', 'account-misc-tag'],
+
+				}
+			{{/if}}
+			
+			{{#if user.isStore}}
+				var mappings = {
+					'/home/dashboard' : ['index-tag', 'index-dashboard-tag'],
+					'/home/dashboard/'  : ['index-tag', 'index-dashboard-tag'],
+
+					'/home/personnel/member/' : ['personnel-tag', 'personnel-member-tag'],
+					'/home/personnel/agent/' : ['personnel-tag', 'personnel-agent-tag'],
+					
+                    '/home/detail/ad' : ['info-tag', 'info-ad-tag'],
+
+					'/home/storeCurrency/transfer/' : ['storeCurrency-tag', 'storeCurrency-transfer-tag'],
+					'/home/storeCurrency/history/' : ['storeCurrency-tag', 'storeCurrency-history-tag'],
+                    '/home/storeCurrency/autoTransfer/' : ['storeCurrency-tag', 'storeCurrency-autoTransfer-tag'],
+					'/home/storeCurrency/confirm/' : ['storeCurrency-tag', 'storeCurrency-confirm-tag'],
+
+                    '/home/mainCurrency/exchange-history/' : ['mainCurrency-tag', 'mainCurrency-exchangeHistory-tag'],
+
+					'/home/report/expenditure/' : ['report-tag', 'report-expenditure-tag'],
+
+                    '/home/info/ad/' : ['ad-tag', 'info-ad-tag'],
+					
+					'/home/account/misc/' : ['account-tag', 'account-misc-tag'],
+
+				}
+			{{/if}}
+			
+			{{#if user.isAgent}}
+				var mappings = {
+					'/home/dashboard' : ['index-tag', 'index-dashboard-tag'],
+					'/home/dashboard/'  : ['index-tag', 'index-dashboard-tag'],
+
+					'/home/personnel/member/' : ['personnel-tag', 'personnel-member-tag'],
+
+					'/home/storeCurrency/transfer/' : ['storeCurrency-tag', 'storeCurrency-transfer-tag'],
+					'/home/storeCurrency/history/' : ['storeCurrency-tag', 'storeCurrency-history-tag'],
+
+                    '/home/mainCurrency/exchange-history/' : ['mainCurrency-tag', 'mainCurrency-exchangeHistory-tag'],
+                    
+                    '/home/report/expenditure/' : ['report-tag', 'report-expenditure-tag'],
+
+					'/home/account/misc/' : ['account-tag', 'account-misc-tag'],
+				}
+			{{/if}}
+
+			$('#' + mappings[pathname][0]).addClass('m-menu__item--active');
+			$('#' + mappings[pathname][0]).addClass('m-menu__item--open'); 
+        });
+    </script>
+</html>

@@ -1,0 +1,29 @@
+wget http://download.redis.io/releases/redis-5.0.0.tar.gz
+tar xzf redis-5.0.0.tar.gz
+yum install tcl
+cd redis-5.0.0
+sudo make install
+cd utils
+sudo ./install_server.sh
+(executable path is in /usr/local/bin/redis-server)
+
+data dir : /var/redis/6379
+config : /etc/redis/6379.conf
+instance : /etc/init.d/redis_6379            
+run instance : sudo /etc/init.d/redis_6379 start
+stop instance : sudo /etc/init.d/redis_6379 stop
+see log : cat /var/log/redis_6379.log
+
+Solve warning when start redis : 
+    (https://blog.csdn.net/jiangshouzhuang/article/details/50864933)
+    (https://blog.csdn.net/a491857321/article/details/52006376)
+
+    net.core.somaxconn= 1024
+    vm.overcommit_memory = 1
+    add to /etc/sysctl.conf
+    sudo sysctl -p
+
+    sudo sh -c "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+    run and add to /etc/rc.local
+
+    restart redis

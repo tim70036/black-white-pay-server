@@ -1,0 +1,97 @@
+RDS parameter group
+timezone
+time language
+skip_name_resolve
+innodb_lock_wait_timeout
+innodb_rollback_on_timeout
+innodb_deadlock_detect
+innodb_print_all_deadlocks
+innodb_status_output
+innodb_status_output_locks
+
+binlog_expire_logs_seconds 設小阿
+general_log 可關
+
+
+-------------------------------------------------
+全覆蓋 : Truncate all table -> import
+
+------------------------------------------------
+public access & set security group
+
+-------------------------------------------------
+Create New DB : 
+
+    Stored procedure
+    View
+    table Status, TransType
+    parameter group
+    user privilege
+    Securirty group: delete default, add rds inbound allow ssh-dev group
+
+-------------------------------------------------
+
+
+
+
+-------------------------------------------------
+
+#當前運行的所有事務
+SELECT * FROM information_schema.INNODB_TRX;
+
+
+SELECT * FROM performance_schema.events_statements_current 
+WHERE THREAD_ID = 1487
+
+select * 
+from mysql.general_log
+where thread_id = 1487
+order by event_time desc
+
+
+#當前出現的鎖
+mysql> SELECT * FROM information_schema.INNODB_LOCKs;
+
+#鎖等待的對應關係
+mysql> SELECT * FROM information_schema.INNODB_LOCK_waits;
+
+-------------------------------------------------
+https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-transaction-model.html
+
+Transaction : 
+    InnoDB performs locking at the row level and runs queries as nonlocking consistent reads by default,
+
+innodb_lock_wait_timeout : 
+
+    The length of time in seconds an InnoDB transaction waits for a row lock before giving up. The default value is 50 seconds. When a lock wait timeout occurs, the current statement is rolled back (not the entire transaction). 
+    
+    To have the entire transaction roll back, start the server with the --innodb_rollback_on_timeout option. 
+
+    innodb_lock_wait_timeout applies to InnoDB row locks. A MySQL table lock does not happen inside InnoDB and this timeout does not apply to waits for table locks.
+
+    The lock wait timeout value does not apply to deadlocks when innodb_deadlock_detect is enabled (the default) because InnoDB detects deadlocks immediately and rolls back one of the deadlocked transactions. When innodb_deadlock_detect is disabled, InnoDB relies on innodb_lock_wait_timeout for transaction rollback when a deadlock occurs.
+
+innodb_rollback_on_timeout : 
+
+    A transaction deadlock causes InnoDB to roll back the entire transaction. Retry the whole transaction when this happens.
+    A lock wait timeout causes InnoDB to roll back only the single statement that was waiting for the lock and encountered the timeout.To have the entire transaction roll back, start the server with the --innodb_rollback_on_timeout option
+
+innodb_deadlock_detect : 
+
+    When deadlock detection is enabled (the default) and a deadlock does occur, InnoDB detects the condition and rolls back one of the transactions (the victim). If deadlock detection is disabled using the innodb_deadlock_detect configuration option, InnoDB relies on the innodb_lock_wait_timeout setting to roll back transactions in case of a deadlock. 
+
+    On high concurrency systems, deadlock detection can cause a slowdown when numerous threads wait for the same lock. At times, it may be more efficient to disable deadlock detection and rely on the innodb_lock_wait_timeout setting for transaction rollback when a deadlock occurs.
+
+    To see the last deadlock in an InnoDB user transaction, use the SHOW ENGINE INNODB STATUS command. (Search for LATEST DETECTED DEADLOCK)
+
+innodb_print_all_deadlocks : 
+
+     enabled to print information about all deadlocks to the mysqld error log
+
+innodb_status_output & innodb_status_output_locks : 
+
+    enable the standard InnoDB Monitor and InnoDB Lock Monitor.
+
+    To enable the InnoDB Lock Monitor, set the innodb_status_output_locks system variable to ON. Both the InnoDB standard Monitor and InnoDB Lock Monitor must be enabled to have InnoDB Lock Monitor data printed periodically:
+
+    As an alternative to enabling the standard InnoDB Monitor for periodic output, you can obtain standard InnoDB Monitor output on demand using the SHOW ENGINE INNODB STATUS SQL statement

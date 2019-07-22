@@ -1,0 +1,140 @@
+{{!-- Import custom stylesheet to layout --}}
+{{#section 'css'}}
+    <link href="/home/style.css" rel="stylesheet" type="text/css" />
+{{/section}}
+{{!-- Import custom script to layout --}}
+{{#section 'js'}}
+	<script src="/home/mainCurrency/js/transfer.js" type="text/javascript"></script>
+
+	<script>
+		var transTypeOptions = [
+
+			{{#each transTypeOptions}}
+				{ 
+					id : '{{code}}',
+					text : '{{description}}',
+					html : '<span class="transtype-option m-badge m-badge--{{class}} m-badge--rounded">{{description}}</span>',
+					title : '{{description}}',
+				}, 
+			{{/each}}
+		];
+	</script>
+
+{{/section}}
+
+{{!-- Header goes here --}}
+<!-- BEGIN: Subheader -->
+<div class="m-subheader ">
+	<div class="d-flex align-items-center">
+		<div class="mr-auto">
+			<h3 class="m-subheader__title "></h3>
+		</div>
+	</div>
+</div>
+<!-- END: Subheader -->
+
+{{!-- Content goes here --}}
+<div class="m-content">
+
+		<!--begin::Portlet-->
+		<div id="transfer-portlet" class="m-portlet m-portlet--tabs  m-portlet--mobile">
+			<div class="m-portlet__head">
+				<div class="m-portlet__head-tools">
+					<ul class="nav nav-tabs m-tabs-line m-tabs-line--danger m-tabs-line--2x" role="tablist">
+						<li class="nav-item m-tabs__item">
+							<a class="nav-link m-tabs__link active" data-toggle="tab" href="#tab-transfer" role="tab">
+								<i class="la la-exchange"></i> 聯盟幣轉帳
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+
+			
+			<div class="m-portlet__body">
+				<div class="tab-content">
+					<div class="tab-pane active" id="tab-transfer" role="tabpanel">
+						<!--begin::Form-->
+						<form id="transfer-form" autocomplete="off" class="m-form m-form--fit m-form--label-align-right">
+							<!--begin::Portlet Body-->
+							<div class="m-portlet__body">
+								{{!-- <div class="form-group m-form__group row">
+									<label class="col-form-label col-lg-3 col-sm-12">轉帳類型 *</label>
+									<div class="col-lg-4 col-md-9 col-sm-12 m-form__group-sub">
+										<select class="form-control m-select2 m-input" id="transTypeOptionCode" name="transTypeOptionCode">
+											<option></option>
+										</select>
+									</div>
+								</div> --}}
+								<div class="form-group m-form__group row">
+									<label class="col-form-label col-lg-3 col-sm-12">轉出帳號 *</label>
+									<div class="col-lg-4 col-md-9 col-sm-12 m-form__group-sub">
+										<div class="m-input-icon m-input-icon--left">
+											<input id="accountFrom" name="accountFrom" type="text" class="form-control m-input" placeholder="請輸入轉出帳號" autocomplete="new-password">
+											<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-user"></i></span></span>
+										</div>
+										<span class="m-form__help"></span>
+									</div>
+								</div>
+								<div class="form-group m-form__group row">
+									<label class="col-form-label col-lg-3 col-sm-12">轉入帳號 *</label>
+									<div class="col-lg-4 col-md-9 col-sm-12 m-form__group-sub">
+										<div class="m-input-icon m-input-icon--left">
+											<input id="accountTo" name="accountTo" type="text" class="form-control m-input" placeholder="請輸入轉入帳號" autocomplete="new-password">
+											<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-user"></i></span></span>
+										</div>
+										<span class="m-form__help"></span>
+									</div>
+								</div>
+								<div class="form-group m-form__group row">
+									<label class="col-form-label col-lg-3 col-sm-12">轉帳數量 *</label>
+									<div class="col-lg-4 col-md-9 col-sm-12 m-form__group-sub">
+										<div class="input-group">
+											<input name="amount" type="text" class="form-control m-input" placeholder="請輸入轉帳數量" autocomplete="new-password">
+											{{!-- <div class="input-group-append"><span class="input-group-text">$</span></div> --}}
+										</div>
+										<span class="m-form__help"></span>
+									</div>
+								</div>
+								<div class="form-group m-form__group row">
+									<label class="col-form-label col-lg-3 col-sm-12">輸入個人交易密碼 *</label>
+									<div class="col-lg-4 col-md-9 col-sm-12 m-form__group-sub">
+										<div class="m-input-icon m-input-icon--right">
+											<input  name="transPwd" type="password" class="form-control m-input" placeholder="請輸入交易密碼" autocomplete="new-password">
+											<span class="m-input-icon__icon m-input-icon__icon--right"><span><i class="la la-key"></i></span></span>
+										</div>
+										<span class="m-form__help"></span>
+									</div>
+								</div>
+								<div class="form-group m-form__group row">
+									<label class="col-form-label col-lg-3 col-sm-12">備註</label>
+									<div class="col-lg-4 col-md-9 col-sm-12 m-form__group-sub">
+										​<textarea name="comment" class="form-control m-input" rows="3"></textarea>
+									</div>
+									
+								</div>
+							</div>
+							<!--end::Portlet Body-->
+
+							<div class="m-portlet__foot m-portlet__foot--fit">
+								<div class="m-form__actions m-form__actions">
+									<div class="row">
+										<div class="col-lg-3 col-sm-12"></div>
+										<div class="col-lg-4 col-md-9 col-sm-12 m--align-center">
+											<button id="submitButton" type="submit" class="btn m-btn--square  btn-primary m-btn m-btn--custom">確認轉帳</button>
+											<button type="reset" class="m_reset btn m-btn--square  btn-secondary m-btn m-btn--custom">取消</button>
+										</div>
+										
+									</div>
+								</div>
+							</div>
+						</form>
+						<!--end::Form-->
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<!--end::Portlet-->
+</div>

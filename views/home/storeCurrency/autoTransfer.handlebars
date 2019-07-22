@@ -1,0 +1,111 @@
+{{!-- Import custom stylesheet to layout --}}
+{{#section 'css'}}
+	<style>
+		table, th, td {
+			border: 1px solid black;
+			border-collapse: collapse;
+		}
+	</style>
+{{/section}}
+{{!-- Import custom script to layout --}}
+{{#section 'js'}}
+	<script src="/home/assets/vendors/custom/jquery-ui/jquery-ui.bundle.js" type="text/javascript"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+	<script src="/home/storeCurrency/js/autoTransfer.js" type="text/javascript"></script>
+{{/section}}
+
+{{!-- Header goes here --}}
+<!-- BEGIN: Subheader -->
+<div class="m-subheader ">
+	<div class="d-flex align-items-center">
+		<div class="mr-auto">
+			<h3 class="m-subheader__title "></h3>
+		</div>
+	</div>
+</div>
+<!-- END: Subheader -->
+
+{{!-- Content goes here --}}
+<div class="m-content">
+	<div id="import-portlet" class="m-portlet m-portlet--mobile">
+		<div class="m-portlet__head">
+			<div class="m-portlet__head-caption">
+				<div class="m-portlet__head-title">
+					<h2 class="m-portlet__head-text">
+						上傳 Excel 檔
+					</h2>
+				</div>
+			</div>
+		</div>
+		<form id="import-form" autocomplete="off" class="m-form m-form--fit m-form--label-align-right">
+			<div class="m-portlet__body">
+				<div class="form-group m-form__group row">
+					<div class="col-form-label col-lg-4 col-sm-12"></div>
+					<div class="col-lg-4 col-md-9 col-sm-12">
+						<div class="m-dropzone dropzone m-dropzone--success" action="inc/api/dropzone/upload.php" id="importdropzone">
+							<div class="m-dropzone__msg dz-message needsclick">
+								<h3 class="m-dropzone__msg-title">拖曳或點擊上傳檔案</h3>
+								<span class="m-dropzone__msg-desc">請上傳 xls xlsx 檔案</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group m-form__group row">
+					<label class="col-form-label col-lg-4 col-sm-12">輸入個人交易密碼 *</label>
+					<div class="col-lg-4 col-md-9 col-sm-12 m-form__group-sub">
+						<div class="m-input-icon m-input-icon--right">
+							<input id="transPwd" name="transPwd" type="password" class="form-control m-input" placeholder="請輸入交易密碼" autocomplete="new-password">
+							<span class="m-input-icon__icon m-input-icon__icon--right"><span><i class="la la-key"></i></span></span>
+						</div>
+						<span class="m-form__help"></span>
+					</div>
+				</div>
+			</div>
+			<div class="m-portlet__foot m-portlet__foot--fit">
+				<div class="m-form__actions m-form__actions">
+					<div class="row">
+						<div class="col-lg-5"></div>
+						<div class="col-lg-7 ml-lg-auto">
+							<button id="submitButton" type="submit" class="btn m-btn--square  btn-primary m-btn m-btn--custom  ">確定上傳</button>
+							<button onclick="cancel()" type="reset" class="btn m-btn--square  btn-secondary m-btn m-btn--custom  ">取消</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div id="upload-result" class="m-portlet m-portlet--mobile">
+		<div class="m-portlet__head">
+			<div class="m-portlet__head-caption">
+				<div class="m-portlet__head-title">
+					<h2 class="m-portlet__head-text">
+						上傳結果
+					</h2>
+				</div>
+			</div>
+		</div>
+		<div class="m-portlet__body">
+			<div class="form-group m-form__group row">
+				<label class="col-form-label col-lg-4 col-sm-12" id="uploadFileName">上傳檔案名稱&ensp;:</label>
+			</div>
+			<table style="width:50%" >
+				<thead>
+					<tr>
+						<th>資料欄位</th>
+						<th>執行結果</th>
+					</tr>
+				</thead>
+				<tbody id="evalResult">
+				</tbody>
+			</table>
+		</div>
+		<div class="m-portlet__foot m-portlet__foot--fit">
+			<div class="row">
+				<div class="col-lg-7 ml-lg-auto">
+					<button onclick="clearDetail()" type="reset" class="btn m-btn--square  btn-secondary m-btn m-btn--custom ">清除</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

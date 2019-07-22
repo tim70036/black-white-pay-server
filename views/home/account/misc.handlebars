@@ -1,0 +1,445 @@
+{{!-- Header goes here --}}
+{{#section 'js'}}
+	<script src="/home/assets/vendors/custom/jquery-ui/jquery-ui.bundle.js" type="text/javascript"></script>
+	<script src="/home/account/js/misc.js" type="text/javascript"></script>
+	
+{{/section}}
+<!-- BEGIN: Subheader -->
+<div class="m-subheader ">
+	<div class="d-flex align-items-center">
+		<div class="mr-auto">
+			<h3 class="m-subheader__title "></h3>
+		</div>
+	</div>
+</div>
+<!-- END: Subheader -->
+
+{{!-- Content goes here --}}
+<div class="m-content">
+	<div id="misc-portlet" class="m-portlet m-portlet--mobile">
+		<div class="m-portlet__head">
+				<div class="m-portlet__head-caption">
+					<div class="m-portlet__head-title">
+						<h2 class="m-portlet__head-text">
+							一般帳號設定
+						</h2>
+					</div>
+				</div>
+		</div>
+		<!-- begin outer portlet body -->
+		<div class="m-portlet__body">
+			<div class="m-portlet m-portlet--mobile">
+				<div class="m-portlet__head">
+					<div class="m-portlet__head-caption">
+						<div class="m-portlet__head-title">
+							<div class="m-portlet__head-text">
+								修改帳號資訊
+							</div>
+						</div>
+					</div>
+					<div class="m-portlet__head-tools">
+						<ul class="m-portlet__nav">
+							<li class="m-portlet__nav-item">
+								<button  id="createFormButton" onclick="fillaccount()" data-toggle="modal" data-target="#accountedit-modal" type="button" class="btn btn-accent m-btn m-btn--custom m-btn--icon m-btn--bolder">
+									<span>
+										<i class="fa fa-user-edit"></i>
+										<span>修改</span>
+									</span>
+								</button>
+							</li>
+						</ur>
+					</div>
+				</div>
+				<div class="m-portlet__body">
+					<!--begin::Form Section-->
+					<div class="m-form__section m-form__section--first">
+						<div class="form-group m-form__group row">
+							<label class="col-lg-2 col-form-label">名稱</label>
+							<div class="col-lg-10 m-form__group-sub">
+								<div class="m-input-icon m-input-icon--left">
+									<input id="showname" name="showname" type="text" class="form-control m-input" placeholder="{{Info.name}}" disabled>
+									<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="flaticon-exclamation-2"></i></span></span>
+								</div>
+								<span class="m-form__help"></span>
+							</div>
+						</div>
+						<div class="form-group m-form__group row">
+							<label class="col-lg-2 col-form-label">信箱 </label>
+							<div class="col-lg-10 m-form__group-sub">
+								<div class="m-input-icon m-input-icon--left">
+									<input id="showemail" name="showemail" type="text" class="form-control m-input" placeholder="{{Info.email}}" disabled>
+									<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-envelope"></i></span></span>
+								</div>
+								<span class="m-form__help"> </span>
+							</div>
+						</div>
+                        <div class="form-group m-form__group row">
+							<label class="col-lg-2 col-form-label">電話 </label>
+							<div class="col-lg-10 m-form__group-sub">
+								<div class="m-input-icon m-input-icon--left">
+									<input id="showphoneNumber" name="showphoneNumber" type="text" class="form-control m-input" placeholder="{{Info.phoneNumber}}" disabled>
+									<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="fa fa-phone"></i></span></span>
+								</div>
+								<span class="m-form__help"> </span>
+							</div>
+						</div>
+                        {{#if user.isStore}}
+                        <div class="form-group m-form__group row">
+							<label class="col-lg-2 col-form-label">地址 </label>
+							<div class="col-lg-10 m-form__group-sub">
+								<div class="m-input-icon m-input-icon--left">
+									<input id="showaddress" name="showaddress" type="text" class="form-control m-input" placeholder="{{Info.address}}" disabled>
+									<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="fa fa-address-card"></i></span></span>
+								</div>
+								<span class="m-form__help"> </span>
+							</div>
+						</div>
+                        <div class="form-group m-form__group row">
+							<label class="col-lg-2 col-form-label">營業時間 </label>
+							<div class="col-lg-10 m-form__group-sub">
+								<div class="m-input-icon m-input-icon--left">
+									<input id="showbusinesshours" name="showbusinesshours" type="text" class="form-control m-input" placeholder="{{Info.businesshours}}" disabled>
+									<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="fa"></i></span></span>
+								</div>
+								<span class="m-form__help"> </span>
+							</div>
+						</div>
+                        {{/if}}
+					</div>
+					<!--end::Form Section-->
+				</div>
+			</div>
+
+			<!--begin::Form Section-->
+			<div class="m-portlet m-portlet--mobile">
+				<div class="m-portlet__head">
+						<div class="m-portlet__head-caption">
+							<div class="m-portlet__head-title">
+								<h2 class="m-portlet__head-text">
+									修改密碼
+								</h2>
+							</div>
+						</div>
+						<div class="m-portlet__head-tools">
+							<ul class="m-portlet__nav">
+								<li class="m-portlet__nav-item">
+									<button  id="createFormButton" onclick="fillpwd()" type="button" data-toggle="modal" data-target="#pwdedit-modal" class="btn btn-accent m-btn m-btn--custom m-btn--icon m-btn--bolder">
+										<span>
+											<i class="fa fa-user-edit"></i>
+											<span>修改</span>
+										</span>
+									</button>
+								</li>
+							</ur>
+						</div>
+				</div>
+			</div>
+
+			<div class="m-portlet m-portlet--mobile">
+				<div class="m-portlet__head">
+						<div class="m-portlet__head-caption">
+							<div class="m-portlet__head-title">
+								<h2 class="m-portlet__head-text">
+									修改交易密碼
+								</h2>
+							</div>
+						</div>
+						<div class="m-portlet__head-tools">
+							<ul class="m-portlet__nav">
+								<li class="m-portlet__nav-item">
+									<button  id="createFormButton" onclick="filltranspwd()" type="button" data-toggle="modal" data-target="#transPwdedit-modal" class="btn btn-accent m-btn m-btn--custom m-btn--icon m-btn--bolder">
+										<span>
+											<i class="fa fa-user-edit"></i>
+											<span>修改</span>
+										</span>
+									</button>
+								</li>
+							</ur>
+						</div>
+				</div>
+			</div>
+
+            <div class="m-portlet m-portlet--mobile">
+				<div class="m-portlet__head">
+						<div class="m-portlet__head-caption">
+							<div class="m-portlet__head-title">
+								<h2 class="m-portlet__head-text">
+									修改圖片
+								</h2>
+							</div>
+						</div>
+						<div class="m-portlet__head-tools">
+							<ul class="m-portlet__nav">
+								<li class="m-portlet__nav-item">
+									<button  id="createFormButton" type="button" data-toggle="modal" data-target="#imgedit-modal" class="btn btn-accent m-btn m-btn--custom m-btn--icon m-btn--bolder">
+										<span>
+											<i class="fa fa-user-edit"></i>
+											<span>修改</span>
+										</span>
+									</button>
+								</li>
+							</ur>
+						</div>
+				</div>
+			</div>
+
+			<!-- begin accounteditmodal -->
+			<div class="modal fade" id="accountedit-modal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<form id="accountedit-form" autocomplete="off" class="m-form m-form--state m-form--label-align-right">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLabel">修改帳號資訊</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								</button>
+							</div>
+							<div class="modal-body">
+								<div class="m-form__section m-form__section--first">
+									<div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">名稱</label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<input id="name" name="name" type="text" class="form-control m-input m-input" value="{{Info.name}}" >
+												<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="flaticon-exclamation-2"></i></span></span>
+											</div>
+										</div>
+									</div>
+									
+									<div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">修改信箱 </label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<input id="email" name="email" type="text" class="form-control m-input" value="{{Info.email}}">
+												<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-envelope"></i></span></span>
+											</div>
+											<span class="m-form__help"> </span>
+										</div>
+									</div>
+
+                                    <div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">修改電話 </label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<input id="phoneNumber" name="phoneNumber" type="text" class="form-control m-input" value="{{Info.phoneNumber}}">
+												<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="fa fa-phone"></i></span></span>
+											</div>
+											<span class="m-form__help"> </span>
+										</div>
+									</div>
+                                    {{#if user.isStore}}
+                                    <div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">地址 </label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<input id="address" name="address" type="text" class="form-control m-input" value="{{Info.address}}">
+												<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="fa fa-address-card"></i></span></span>
+											</div>
+											<span class="m-form__help"> </span>
+										</div>
+									</div>
+                                    <div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">營業時間 </label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<input id="businesshours" name="businesshours" type="text" class="form-control m-input" value="{{Info.businesshours}}">
+												<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="fa"></i></span></span>
+											</div>
+											<span class="m-form__help"> </span>
+										</div>
+									</div>
+                                    {{/if}}
+								</div>
+							</div>
+							<div class="modal-footer">
+								<div class="row">
+									<div class="col m--align-right">
+										<button id="accounteditButton" type="submit" class="btn m-btn--square  btn-primary m-btn m-btn--custom  ">確定修改</button>
+										<button type="button" class="btn m-btn--square  btn-secondary m-btn m-btn--custom" data-dismiss="modal">取消</button>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<!-- end accountedit_modal -->
+
+			<!-- begin pwdedit_modal -->
+			<div class="modal fade" id="pwdedit-modal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<form id="pwdedit-form" autocomplete="off" class="m-form m-form--state m-form--label-align-right">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLabel">修改密碼</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								</button>
+							</div>
+							<div class="modal-body">
+								<div class="m-form__section m-form__section--first">
+									<div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">輸入舊密碼</label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<!--  -->
+												<input id="oldpassword" name="oldpassword" type="password" class="form-control m-input" placeholder="請輸入舊密碼">
+												<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-key"></i></span></span>
+											</div>
+											<span class="m-form__help"></span>
+										</div>
+									</div>
+									<div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">輸入新密碼</label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<!--  -->
+												<input id="newpassword" name="newpassword" type="password" class="form-control m-input" placeholder="請輸入新密碼" >
+												<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-key"></i></span></span>
+											</div>
+										</div>
+									</div>
+									<div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">確認新密碼</label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<!--  -->
+												<input id="confirmpassword" name="confirmpassword" type="password" class="form-control m-input" placeholder="請輸入新密碼" >
+												<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-key"></i></span></span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<div class="row">
+									<div class="col m--align-right">
+										<button id="pwdeditButton" type="submit" class="btn m-btn--square  btn-primary m-btn m-btn--custom  ">確定修改</button>
+										<button type="button" class="btn m-btn--square  btn-secondary m-btn m-btn--custom" data-dismiss="modal">取消</button>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<!-- end pwdedit_modal -->
+
+			<!-- begin transPwdedit_modal -->
+			<div class="modal fade" id="transPwdedit-modal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<form id="transPwdedit-form" autocomplete="off" class="m-form m-form--state m-form--label-align-right">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLabel">修改交易密碼</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body">
+								<div class="m-form__section m-form__section--first">
+									<div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">輸入舊交易密碼</label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<!--  -->
+												<input id="oldTransPwd" name="oldTransPwd" type="password" class="form-control m-input" placeholder="請輸入舊交易密碼">
+												<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-key"></i></span></span>
+											</div>
+											<span class="m-form__help"></span>
+										</div>
+									</div>
+									<div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">輸入新交易密碼</label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<!--  -->
+												<input id="newTransPwd" name="newTransPwd" type="password" class="form-control m-input" placeholder="請輸入新交易密碼" >
+												<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-key"></i></span></span>
+											</div>
+										</div>
+									</div>
+									<div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">確認新交易密碼</label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<!--  -->
+												<input id="confirmTransPwd" name="confirmTransPwd" type="password" class="form-control m-input" placeholder="請再次輸入新交易密碼" >
+												<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-key"></i></span></span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<div class="row">
+									<div class="col m--align-right">
+										<button id="transpwdeditButton" type="submit" class="btn m-btn--square  btn-primary m-btn m-btn--custom  ">確定修改</button>
+										<button type="button" class="btn m-btn--square  btn-secondary m-btn m-btn--custom" data-dismiss="modal">取消</button>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<!-- end transPwdedit_modal -->
+            
+            <div class="modal fade" id="imgedit-modal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg  modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<form id="imgedit-form" autocomplete="off" class="m-form m-form--state m-form--label-align-right" enctype="multipart/form-data">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLabel">上傳圖片</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								</button>
+							</div>
+							<div class="modal-body">
+								<div class="m-form__section m-form__section--first">
+									<div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">請上傳頭貼</label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<input id="userImg" name="userImg" type="file" class="form-control m-input">
+											</div>
+											<span class="m-form__help"></span>
+										</div>
+									</div>
+                                    {{#if user.isStore}}
+                                    <div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">請上傳店家圖片</label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<input id="roleImg" name="roleImg" type="file" class="form-control m-input">
+											</div>
+											<span class="m-form__help"></span>
+										</div>
+									</div>
+                                    <div class="form-group m-form__group row">
+										<label class="col-lg-2 col-form-label">請上傳貨幣圖片</label>
+										<div class="col-lg-10 m-form__group-sub">
+											<div class="m-input-icon m-input-icon--left">
+												<input id="currencyImg" name="currencyImg" type="file" class="form-control m-input">
+											</div>
+											<span class="m-form__help"></span>
+										</div>
+									</div>
+                                    {{/if}}
+								</div>
+							</div>
+							<div class="modal-footer">
+								<div class="row">
+									<div class="col m--align-right">
+										<button id="imgeditButton" name="submit" type="submit" class="btn m-btn--square  btn-primary m-btn m-btn--custom  ">確定修改</button>
+										<button type="button" class="btn m-btn--square  btn-secondary m-btn m-btn--custom" data-dismiss="modal">取消</button>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+            
+			<!-- begin otherInfoedit_modal -->
+		</div>
+		<!-- end outer portlet body -->
+		<div class="m-portlet__foot m-portlet__foot--fit">
+		</div>
+	</div>
+</div>

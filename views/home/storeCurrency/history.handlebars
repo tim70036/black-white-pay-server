@@ -1,0 +1,287 @@
+{{!-- Import custom stylesheet to layout --}}
+{{#section 'css'}}
+    <link href="/home/assets/vendors/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
+    <link href="/home/style.css" rel="stylesheet" type="text/css" />
+{{/section}}
+{{!-- Import custom script to layout --}}
+{{#section 'js'}}
+	<script src="/home/assets/vendors/custom/datatables/datatables.bundle.js" type="text/javascript"></script>
+	<script src="/home/storeCurrency/js/history.js" type="text/javascript"></script>
+
+		<script>
+			var agents = [
+				{{#each agentsData}}
+					{ 
+						id : '{{account}}',
+						text : '{{name}}',
+						html :  '<span class="agent-option">' + 
+                                    '{{name}} &nbsp;  (<span class="m--font-bold m--font-primary">{{account}}</span>)' +         
+                                '</span>',
+						title : '{{name}}',
+					}, 
+				{{/each}}
+			];
+
+			var stores = [
+				{{#each storesData}}
+					{ 
+						id : '{{account}}',
+						text : '{{name}}',
+						html :  '<span class="store-option">' + 
+                                    '{{name}} &nbsp;  (<span class="m--font-bold m--font-primary">{{account}}</span>)' +         
+                                '</span>',
+						title : '{{name}}',
+					}, 
+				{{/each}}
+			];
+
+			var storeCurrency = [
+				{{#each storeCurrencyData}}
+					{
+						id : '{{id}}',
+						text : '{{currencyName}}',
+						html :  '<span class="transcurrency-option">' + 
+                                    '{{name}} &nbsp;  (<span class="m--font-bold m--font-primary">{{currencyName}}</span>)' + 
+                                '</span>',
+						title : '{{currencyName}}',
+					},
+				{{/each}}
+			];
+
+			var transType = [
+				{{#each transTypeData}}
+					{ 
+						id : '{{transTypeCode}}',
+						text : '{{transTypeDescription}}',
+						html : '<span class="transtype-option m-badge m-badge--{{transTypeClass}} m-badge--rounded">{{transTypeDescription}}</span>',
+						title : '{{transTypeDescription}}',
+						state : '{{transTypeClass}}',
+					},
+				{{/each}}
+			];
+
+			var role;
+			{{#if user.isAdmin}}
+				role = 'admin';
+			{{/if}}
+			{{#if user.isStore}}
+				role = 'store';
+			{{/if}}
+			{{#if user.isAgent}}
+				role = 'agent';
+			{{/if}}
+	</script>
+{{/section}}
+
+{{!-- Header goes here --}}
+<!-- BEGIN: Subheader -->
+<div class="m-subheader ">
+	<div class="d-flex align-items-center">
+		<div class="mr-auto">
+			<h3 class="m-subheader__title "></h3>
+		</div>
+	</div>
+</div>
+<!-- END: Subheader -->
+
+{{!-- Content goes here --}}
+<div class="m-content">
+
+	<div class="m-portlet m-portlet--mobile">
+		<div class="m-portlet__head">
+			<div class="m-portlet__head-caption">
+				<div class="m-portlet__head-title">
+					<h2 class="m-portlet__head-text">
+						寶石紀錄查詢
+					</h2>
+				</div>
+			</div>  
+		</div>
+		
+		<div class="m-portlet__body">
+			
+			<!--begin: Search Form -->
+
+			<form class="m-form m-form--fit" id="history-form">
+				<div class="form-group m-form__group row">
+					<div class="col-xl-5 col-lg-8 col-md-9 col-sm-12 m--margin-bottom-15">
+						<label>查詢日期:</label>
+						<div class="input-group date">
+							<input class="form-control m-input" readonly placeholder="請選擇欲查詢的時間範圍" type="text" id="datetimes" name="datetimes" />
+		
+							<div class="input-group-append">
+								<span class="input-group-text"><i class="la la-calendar-check-o glyphicon-th"></i></span>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-5 col-md-9 col-sm-12 m--margin-bottom-15">
+						<label>轉帳類型:</label>
+						<select class="form-control m-select2 m-input" data-col-index="1" id="transTypeCode" name="transTypeCode">
+							<option value=""></option>
+						</select>
+					</div>
+					<div class="col-xl-3 col-lg-5 col-md-9 col-sm-12 m--margin-bottom-15">
+						<label>轉帳幣別:</label>
+						<select class="form-control m-select2 m-input" data-col-index="1" id="transCurrency" name="transCurrency">
+							<option value=""></option>
+						</select>
+					</div>
+				</div>
+				{{#unless user.isMember}}
+					<div class="form-group m-form__group row">
+						<div id="option-tab" class="col-xl-5 col-lg-8 col-md-9 col-sm-12 m--margin-bottom-15">
+							<ul class="nav nav-pills nav-pills--accent" role="tablist">
+								{{#if user.isAgent}}
+									<li class="nav-item">
+										<a class="nav-link active" data-toggle="tab" href="#m_tabs_1">個別帳號</a>
+									</li>
+								{{/if}}
+								{{#if user.isStore}}
+									<li class="nav-item">
+										<a class="nav-link active" data-toggle="tab" href="#m_tabs_1">個別帳號</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" data-toggle="tab" href="#m_tabs_2">代理旗下</a>
+									</li>
+								{{/if}}
+								{{#if user.isServiceAgent}}
+									<li class="nav-item">
+										<a class="nav-link active" data-toggle="tab" href="#m_tabs_1">個別帳號</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" data-toggle="tab" href="#m_tabs_2">代理旗下</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" data-toggle="tab" href="#m_tabs_3">店家旗下</a>
+									</li>
+								{{/if}}
+								{{#if user.isAdmin}}
+									<li class="nav-item">
+										<a class="nav-link active" data-toggle="tab" href="#m_tabs_1">個別帳號</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" data-toggle="tab" href="#m_tabs_2">代理旗下</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" data-toggle="tab" href="#m_tabs_3">店家旗下</a>
+									</li>
+								{{/if}}
+							</ul>
+
+
+							<div class="tab-content">
+								{{#if user.isAgent}}
+									<div class="tab-pane active" id="m_tabs_1" role="tabpanel">
+										<div class="m-input-icon m-input-icon--left">
+											<input id="account" name="account" type="text" class="form-control m-input" placeholder="請輸入欲查詢的帳號" data-col-index="4">
+											<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-user"></i></span></span>
+										</div>
+									</div>
+								{{/if}}
+								{{#if user.isStore}}
+									<div class="tab-pane active" id="m_tabs_1" role="tabpanel">
+										<div class="m-input-icon m-input-icon--left">
+											<input id="account" name="account" type="text" class="form-control m-input" placeholder="請輸入欲查詢的帳號" data-col-index="4">
+											<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-user"></i></span></span>
+										</div>
+									</div>
+									<div class="tab-pane" id="m_tabs_2" role="tabpanel">
+										<select class="form-control m-select2 m-input" data-col-index="3" id="agentAccount" name="agentAccount">
+											<option value=""></option>
+										</select>
+									</div>
+								{{/if}}
+								{{#if user.isServiceAgent}}
+									<div class="tab-pane active" id="m_tabs_1" role="tabpanel">
+										<div class="m-input-icon m-input-icon--left">
+											<input id="account" name="account" type="text" class="form-control m-input" placeholder="請輸入欲查詢的帳號" data-col-index="4">
+											<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-user"></i></span></span>
+										</div>
+									</div>
+									<div class="tab-pane" id="m_tabs_2" role="tabpanel">
+										<select class="form-control m-select2 m-input" data-col-index="3" id="agentAccount" name="agentAccount">
+											<option value=""></option>
+										</select>
+									</div>
+									<div class="tab-pane" id="m_tabs_3" role="tabpanel">
+										<select class="form-control m-select2 m-input" data-col-index="2" id="storeAccount" name="storeAccount">
+											<option value=""></option>
+										</select>
+									</div>
+								{{/if}}
+								{{#if user.isAdmin}}
+									<div class="tab-pane active" id="m_tabs_1" role="tabpanel">
+										<div class="m-input-icon m-input-icon--left">
+											<input id="account" name="account" type="text" class="form-control m-input" placeholder="請輸入欲查詢的帳號" data-col-index="4">
+											<span class="m-input-icon__icon m-input-icon__icon--left"><span><i class="la la-user"></i></span></span>
+										</div>
+									</div>
+									<div class="tab-pane" id="m_tabs_2" role="tabpanel">
+										<select class="form-control m-select2 m-input" data-col-index="3" id="agentAccount" name="agentAccount">
+											<option value=""></option>
+										</select>
+									</div>
+									<div class="tab-pane" id="m_tabs_3" role="tabpanel">
+										<select class="form-control m-select2 m-input" data-col-index="2" id="storeAccount" name="storeAccount">
+											<option value=""></option>
+										</select>
+									</div>
+								{{/if}}
+							</div>
+						</div>
+					</div>
+				{{/unless}}
+
+				<div class="m-separator m-separator--md m-separator--dashed"></div>
+				<div class="row">
+					<div class="col-lg-12">
+						<button type="submit" class="btn btn-brand m-btn m-btn--icon" id="m_search">
+							<span>
+								<i class="la la-search"></i>
+								<span>查詢</span>
+							</span>
+						</button>
+						&nbsp;&nbsp;
+						<button type="reset" class="btn btn-secondary m-btn m-btn--icon" id="m_reset">
+							<span>
+								<i class="la la-close"></i>
+								<span>重設欄位</span>
+							</span>
+						</button>
+					</div>
+				</div>
+			</form>
+
+			<table class="table table-bordered table-hover nowrap " id="data-table">
+				<thead>
+					<tr>
+						<th class="dt-center">RecordId</th>		{{!-- 0 --}}
+						<th class="dt-center">帳號</th>		 {{!-- 1 --}}
+						<th class="dt-center">名稱</th>			{{!-- 2 --}}
+						<th class="dt-center">交易類型</th>		{{!-- 3 --}}
+						<th class="dt-center">交易幣別</th>		{{!-- 4 --}}
+						<th class="dt-center">數量</th>			{{!-- 5 --}}
+						<th class="dt-center">對象</th>			{{!-- 6 --}}
+						<th class="dt-center">備註</th>			{{!-- 7 --}}
+						<th class="dt-center">交易時間</th>		{{!-- 8 --}}
+					</tr>
+				</thead>
+
+				<tfoot align="right">
+					<tr>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th></th>
+					</tr>
+				</tfoot>
+			</table>
+
+		</div>
+	</div>
+</div>

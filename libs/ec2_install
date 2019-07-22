@@ -1,0 +1,94 @@
+wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+. ~/.nvm/nvm.sh
+nvm install node
+
+-------------------
+
+
+sudo yum list | grep python3
+sudo yum install python36 -y
+sudo easy_install-3.6 pip
+
+pip3 install pytesseract pillow
+why cannot sudo pip3?
+found in /usr/bin : pip-3.6 
+still borken
+-------------------
+Elastic Beanstalk
+node start command -> use 'npm xxx', not 'node xxx'
+security group close ssh
+
+
+ps --sort -rss -eo rss,pid,command | head
+RSS 單位是 KB
+
+-------------------
+Pm2
+when deploy to AWS
+need npm to start pm2(runtime) 
+config 'npm start' in package.json
+
+-------------------
+Deploy
+credential.js : redis, ec2, rds
+verify.js : socket url
+redis : add cms -> updateRedis.js
+
+-------------------
+Production API server
+
+use different crediential
+
+-------------------
+Test Network Speed
+wget -qO- git.io/superbench.sh | bash
+
+------------------
+EC2 Log
+lastlog 
+last
+who /var/log/wtmp
+
+/var/log/message    系統啓動後的信息和錯誤日誌，是Red Hat Linux中最常用的日誌之一   
+/var/log/secure 與安全相關的日誌信息   
+/var/log/maillog    與郵件相關的日誌信息   
+/var/log/cron   與定時任務相關的日誌信息   
+/var/log/spooler    與UUCP和news設備相關的日誌信息   
+/var/log/boot.log   守護進程啓動和停止相關的日誌消息 
+
+
+--------------------
+~/.bashrc 
+
+export FCAPTCHA_ID='107356'
+export FCAPTCHA_KEY='vHl4hoT7QhIDFTcfAzbyHZ9VCkd4PJ7o'
+export DB_HOST='cmspoker.crmqt6cpjz2b.ap-northeast-1.rds.amazonaws.com'
+export DB_USER='WebServer'
+export DB_PWD='@zZZMoneyComeCome666'
+export DB_NAME='CmsPoker'
+export DB_TZ='Asia/Shanghai'
+export REDIS_HOST='pokeradminredis.v3z93q.0001.apne1.cache.amazonaws.com'
+export REDIS_PORT='6379'
+export SESS_KEY='keyboard cat'
+export SOCK_KEY='apple shit'
+export LOG_GROUP='APIServer/development'
+export AWS_KEY_ID='AKIAJK37FZJFE2DRL3FA'
+export AWS_KEY_SECRET='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'
+
+---------------------
+~/.bashrc 
+
+export FCAPTCHA_ID='107356'
+export FCAPTCHA_KEY='vHl4hoT7QhIDFTcfAzbyHZ9VCkd4PJ7o'
+export DB_HOST='cmspoker-prod.crmqt6cpjz2b.ap-northeast-1.rds.amazonaws.com'
+export DB_USER='WebServer'
+export DB_PWD='@zZZMoneyComeCome666'
+export DB_NAME='CmsPoker'
+export DB_TZ='Asia/Shanghai'
+export REDIS_HOST='pokeradminredis-prod.v3z93q.0001.apne1.cache.amazonaws.com'
+export REDIS_PORT='6379'
+export SESS_KEY='keyboard cat'
+export SOCK_KEY='apple shit'
+export LOG_GROUP='APIServer/production'
+export AWS_KEY_ID='AKIAJK37FZJFE2DRL3FA'
+export AWS_KEY_SECRET='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'
