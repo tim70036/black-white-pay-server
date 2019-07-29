@@ -38,7 +38,7 @@ let renderHandler = async function (req, res) {
     }
 
     if(req.user.role === 'store'){
-        sqlString = `SELECT address, phoneNumber, businesshours FROM StoreInfo WHERE id = ?;`;
+        sqlString = `SELECT address, phoneNumber, businesshours, inflow, outflow, exchangeRate, memberTransfer, currencyName, bindCheck FROM StoreInfo WHERE id = ?;`;
         values = [req.user.roleId];
         sqlString = mysql.format(sqlString, values);
         try {
@@ -50,15 +50,19 @@ let renderHandler = async function (req, res) {
             });
             return;
         }
-
         res.locals.Info = {
             name: useraccountresult[0]['name'],
             email: useraccountresult[0]['email'],
             phoneNumber: storeresult[0]['phoneNumber'],
             address: storeresult[0]['address'],
             businesshours: storeresult[0]['businesshours'],
+            currencyName: storeresult[0]['currencyName'],
+            exchangeRate: storeresult[0]['exchangeRate'],
+            inflow: storeresult[0]['inflow'] == 1 ? '可': '不可',
+            outflow: storeresult[0]['outflow'] == 1 ? '可': '不可',
+            memberTransfer: storeresult[0]['memberTransfer'] == 1 ? '可': '不可',
+            bindCheck: storeresult[0]['bindCheck'] == 1 ? '是': '否',
         };
-
     } else {
         res.locals.Info = {
             name: useraccountresult[0]['name'],

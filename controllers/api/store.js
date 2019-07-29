@@ -77,21 +77,48 @@ let bindHandler = async function(req, res, next){
 
     // Gather all required data
     const { bindCode } = req.body;
-    
-    let sql = `INSERT INTO MemberInfo (
-                            uid, agentId, cash, credit, comment) 
-                        VALUES (?, (SELECT id FROM AgentInfo WHERE bindingCode=?), ?, ?, ?) 
-                        ;`;
-    let values = [req.user.id, bindCode, 0, 0, ''];
-    let sqlString = mysql.format(sql, values);
-    
+    let sql, values, sqlString, results;
+    sql = `SELECT Store.bindCheck
+            From AgentInfo AS Ag
+            INNER JOIN StoreInfo AS Store
+                ON Ag.storeId=Store.id        
+            WHERE Ag.bindingCode=?;`;
+    values = [bindCode];
+    sqlString = mysql.format(sql, values);
     try {
-        await sqlAsync.query(req.db, sqlString);
+        results = await sqlAsync.query(req.db, sqlString);
     } catch (error) {
         req.logger.error(`${error.message}`);
-        return res.json({ errCode : 2, msg: 'Server 錯誤' });
+        return res.json({ errCode : 2, msg: 'Server 錯誤'});
     }
-
+    if(results[0].bindCheck === 1) {
+        sql = `INSERT INTO BindRequest
+                (uid, agentId)
+                VALUES (?, (SELECT id FROM AgentInfo WHERE bindingCode=?));`;
+        values = [req.user.id, bindCode];
+        sqlString = mysql.format(sql, values);
+        try {
+            await sqlAsync.query(req.db, sqlString);
+        } catch (error) {
+            req.logger.error(`${error.message}`);
+            return res.json({ errCode : 2, msg: 'Server 錯誤'});
+        }
+    } else {
+        sql = `INSERT INTO MemberInfo (
+                uid, agentId, cash, credit, comment) 
+                VALUES (?, (SELECT id FROM AgentInfo WHERE bindingCode=?), ?, ?, ?) 
+                ;`;
+        values = [req.user.id, bindCode, 0, 0, ''];
+        sqlString = mysql.format(sql, values);
+        
+        try {
+            await sqlAsync.query(req.db, sqlString);
+        } catch (error) {
+            req.logger.error(`${error.message}`);
+            return res.json({ errCode : 2, msg: 'Server 錯誤' });
+        }
+    }
+    
     return res.json({ errCode : 0, msg: 'success', data: {} });
 };
 

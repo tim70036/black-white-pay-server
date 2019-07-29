@@ -26,8 +26,88 @@
 					</div>
 				</div>
 		</div>
+
+        <div class="m-portlet__body">
+            {{#if user.isStore}}
+			<div class="m-portlet m-portlet--mobile">
+				<div class="m-portlet__head">
+					<div class="m-portlet__head-caption">
+						<div class="m-portlet__head-title">
+							<div class="m-portlet__head-text">
+								基本設定
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="m-portlet__body">
+					<!--begin::Form Section-->
+					<div class="m-form__section m-form__section--first">
+                        <div class="form-group m-form__group row">
+							<label class="col-lg-2 col-form-label">幣名 </label>
+							<div class="col-lg-10 m-form__group-sub">
+								<div class="m-input-icon m-input-icon--left">
+									<input type="text" class="form-control m-input" placeholder="{{Info.currencyName}}" disabled>
+								</div>
+								<span class="m-form__help"> </span>
+							</div>
+						</div>
+
+                        <div class="form-group m-form__group row">
+							<label class="col-lg-2 col-form-label">幣值 </label>
+							<div class="col-lg-10 m-form__group-sub">
+								<div class="m-input-icon m-input-icon--left">
+									<input type="text" class="form-control m-input" placeholder="1 : {{Info.exchangeRate}}" disabled>
+								</div>
+								<span class="m-form__help"> </span>
+							</div>
+						</div>
+
+						<div class="form-group m-form__group row">
+							<label class="col-lg-2 col-form-label">會員間可否轉帳</label>
+							<div class="col-lg-10 m-form__group-sub">
+								<div class="m-input-icon m-input-icon--left">
+									<input type="text" class="form-control m-input" placeholder="{{Info.memberTransfer}}" disabled>
+								</div>
+								<span class="m-form__help"></span>
+							</div>
+						</div>
+					
+                        <div class="form-group m-form__group row">
+							<label class="col-lg-2 col-form-label">綁定代理是否須經由後台審核 </label>
+							<div class="col-lg-10 m-form__group-sub">
+								<div class="m-input-icon m-input-icon--left">
+									<input type="text" class="form-control m-input" placeholder="{{Info.bindCheck}}" disabled>
+								</div>
+								<span class="m-form__help"> </span>
+							</div>
+						</div>
+                        
+                        <div class="form-group m-form__group row">
+							<label class="col-lg-2 col-form-label">貨幣可否流出 </label>
+							<div class="col-lg-10 m-form__group-sub">
+								<div class="m-input-icon m-input-icon--left">
+									<input type="text" class="form-control m-input" placeholder="{{Info.outflow}}" disabled>
+								</div>
+								<span class="m-form__help"> </span>
+							</div>
+						</div>
+                        <div class="form-group m-form__group row">
+							<label class="col-lg-2 col-form-label">貨幣可否流入 </label>
+							<div class="col-lg-10 m-form__group-sub">
+								<div class="m-input-icon m-input-icon--left">
+									<input type="text" class="form-control m-input" placeholder="{{Info.inflow}}" disabled>
+								</div>
+								<span class="m-form__help"> </span>
+							</div>
+						</div>
+                        
+					</div>
+					<!--end::Form Section-->
+				</div>
+			</div>
+            {{/if}}
 		<!-- begin outer portlet body -->
-		<div class="m-portlet__body">
+		{{!-- <div class="m-portlet__body"> --}}
 			<div class="m-portlet m-portlet--mobile">
 				<div class="m-portlet__head">
 					<div class="m-portlet__head-caption">

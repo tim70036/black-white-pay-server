@@ -26,6 +26,7 @@ router.use(/\/personnel\/store\/.*/, auth.allowRole('admin'));
 router.use(/\/personnel\/agent\/.*/, auth.allowRole('admin', 'store'));
 router.use(/\/personnel\/member\/.*/, auth.allowRole('admin', 'store', 'agent'));
 router.use(/\/personnel\/user\/.*/, auth.allowRole('admin'));
+router.use(/\/personnel\/verify\/.*/, auth.allowRole('store'));
 
 // Authorize storeCurrency  
 router.use(/\/storeCurrency\/autoTransfer\/.*/, auth.allowRole('admin', 'store'));
@@ -63,15 +64,17 @@ router.get('/dashboard', dashboard.render);
 router.get('/login', login);
 
 // Personnel management routes
-const { store, agent, member, user } = personnel;
+const { store, agent, member, user, verify } = personnel;
 
 router.get('/personnel/store/', store.render);
 router.get('/personnel/agent/', agent.render);
 router.get('/personnel/member/', member.render);
 router.get('/personnel/user/', user.render);
+router.get('/personnel/verify/', verify.render);
 
 router.get('/personnel/store/read', store.read);
 router.get('/personnel/agent/read', agent.read);
+router.get('/personnel/verify/read', verify.read);
 
 router.post('/personnel/store/create', store.createValidate, store.create);
 router.post('/personnel/agent/create', agent.createValidate, agent.create);
@@ -89,6 +92,9 @@ router.post('/personnel/member/delete', member.deleteValidate, member.delete);
 
 router.post('/personnel/member/search', member.searchValidate, member.search);
 router.post('/personnel/user/search', user.searchValidate, user.search);
+
+router.post('/personnel/verify/accept', verify.verifyValidate, verify.accept);
+router.post('/personnel/verify/deny', verify.verifyValidate, verify.deny);
 
 // Credit management routes
 const { transfer, history, autoTransfer } = storeCurrency;
