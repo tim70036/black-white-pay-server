@@ -63,6 +63,7 @@ async function init(app){
     client.setAsync = promisify(client.set).bind(client);
     client.delAsync = promisify(client.del).bind(client);
     client.getListAsync = promisify(client.lrange).bind(client);
+    client.existsAsync = promisify(client.exists).bind(client);
 
     // Set connection instance to req.redis
     // Then we can use req.redis to access redis connection instance in express
@@ -70,9 +71,6 @@ async function init(app){
         req.redis = client;
         next();
     });
-
-
-
 
     // Express-session
     // Config express to use express-session based on redis store

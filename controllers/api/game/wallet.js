@@ -149,9 +149,9 @@ let takeInHandler = async function(req, res, next) {
     sqlStrings += mysql.format(sqlStringUpdate, values);
 
     let sqlStringTrans1 = ` INSERT INTO GameTransaction
-                            (uid, transTypeCode, amount, gameId)
-                            VALUES (?, ?, ?, ?);`;
-    values = [req.user.id, 4, gameWalletAmount, gameId];
+                            (uid, transTypeCode, amount, gameId, agentId, storeId)
+                            VALUES (?, ?, ?, ?, ?, ?);`;
+    values = [req.user.id, 4, gameWalletAmount, gameId, userWalletInfo.agentId, userWalletInfo.storeId];
     sqlStrings += mysql.format(sqlStringTrans1, values);
 
     let sqlStringTrans2 = ` INSERT INTO StoreTransaction 
@@ -285,9 +285,9 @@ function getTakeOutString(userGameWalletInfo) {
     sqlStringUpdate2 = mysql.format(sqlStringUpdate2, values);
 
     let sqlStringTrans1 = ` INSERT INTO GameTransaction 
-                            (uid, transTypeCode, amount, gameId)
-                            VALUES (?, ?, ?, ?);`;
-    values = [userGameWalletInfo.uid, 5, userGameWalletInfo.balance * -1, userGameWalletInfo.gameId];
+                            (uid, transTypeCode, amount, gameId, agentId, storeId)
+                            VALUES (?, ?, ?, ?, ?, ?);`;
+    values = [userGameWalletInfo.uid, 5, userGameWalletInfo.balance * -1, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
     sqlStringTrans1 = mysql.format(sqlStringTrans1, values);
 
     let sqlStringTrans2 = ` INSERT INTO StoreTransaction 

@@ -2,7 +2,8 @@
 // Import differnt routers
 const
     homeRoute = require('./home'),
-    apiRoute = require('./api');
+    apiRoute = require('./api'),
+    gameRoute = require('./game');
 
  // Make Express use these routers
 function init(app) {
@@ -15,6 +16,7 @@ function init(app) {
      // Make Express use these routers
     app.use('/home', homeRoute);
     app.use('/api', apiRoute);
+    app.use('/game', gameRoute);
 
     // Error Handling
     app.use(function(req, res, next) {

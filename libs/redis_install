@@ -27,3 +27,10 @@ Solve warning when start redis :
     run and add to /etc/rc.local
 
     restart redis
+
+
+
+"\0\0\0\0"
+"\\0" \0
+
+redis-cli -h pokeradminredis.v3z93q.0001.apne1.cache.amazonaws.com -n 1 -p 6379
