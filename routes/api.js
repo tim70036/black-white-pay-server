@@ -33,6 +33,10 @@ router.post('/user/update/thumbnail',
         name: 'userImg',
         maxCount: 1
     }]), user.changeThumbnail);
+router.get('/user/preload-uri', user.preloadUri);
+router.get('/user/qr-re-fav', user.qrReFavList);
+router.post('/user/qr-re-fav/add', user.addQrReFavValidate, user.addQrReFav);
+router.post('/user/qr-re-fav/delete', user.deleteQrReFavValidate, user.deleteQrReFav);
 
 
 // Info routes
