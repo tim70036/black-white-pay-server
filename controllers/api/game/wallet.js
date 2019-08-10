@@ -54,6 +54,7 @@ let takeInHandler = async function(req, res, next) {
                         SELECT
                             UGW.id AS id,
                             UGW.uid AS uid,
+                            U.name AS name,
                             UGW.gameId AS gameId,
                             UGW.agentId AS agentId,
                             UGW.storeId AS storeId,
@@ -66,6 +67,8 @@ let takeInHandler = async function(req, res, next) {
                             ON UGW.gameId=G.id
                         INNER JOIN StoreInfo AS Store
                             ON UGW.storeId=Store.id
+                        INNER JOIN UserAccount AS U
+                            ON UGW.uid=U.id
                         WHERE UGW.uid=? AND UGW.gameId=?
                         ;
                     `;
@@ -149,15 +152,15 @@ let takeInHandler = async function(req, res, next) {
     sqlStrings += mysql.format(sqlStringUpdate, values);
 
     let sqlStringTrans1 = ` INSERT INTO GameTransaction
-                            (uid, transTypeCode, amount, gameId, agentId, storeId)
-                            VALUES (?, ?, ?, ?, ?, ?);`;
-    values = [req.user.id, 4, gameWalletAmount, gameId, userWalletInfo.agentId, userWalletInfo.storeId];
+                            (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                            VALUES (?, ?, ?, ?, ?, ?, ?);`;
+    values = [req.user.id, 4, gameWalletAmount, req.user.id, gameId, userWalletInfo.agentId, userWalletInfo.storeId];
     sqlStrings += mysql.format(sqlStringTrans1, values);
 
     let sqlStringTrans2 = ` INSERT INTO StoreTransaction 
                             (uid, transTypeCode, amount, relatedId, relatedName, storeId, comment)
-                            VALUES (?, ?, ?, ?, (SELECT name FROM GameInfo WHERE id=?), ?, ?);`;
-    values = [req.user.id, 4, amount * -1, gameId, gameId, userWalletInfo.storeId, ''];
+                            VALUES (?, ?, ?, ?, ?, ?, (SELECT name FROM GameInfo WHERE id=?));`;
+    values = [req.user.id, 4, amount * -1, req.user.id, req.user.name, userWalletInfo.storeId, gameId];
     sqlStrings += mysql.format(sqlStringTrans2, values);
 
     // Execute transaction
@@ -200,6 +203,7 @@ let takeOutHandler = async function(req, res, next) {
                         SELECT
                             UGW.id AS id,
                             UGW.uid AS uid,
+                            U.name AS name,
                             UGW.gameId AS gameId,
                             UGW.agentId AS agentId,
                             UGW.storeId AS storeId,
@@ -212,6 +216,8 @@ let takeOutHandler = async function(req, res, next) {
                             ON UGW.gameId=G.id
                         INNER JOIN StoreInfo AS Store
                             ON UGW.storeId=Store.id
+                        INNER JOIN UserAccount AS U
+                            ON UGW.uid=U.id
                         WHERE UGW.uid=? AND UGW.gameId=?
                         ;
                     `;
@@ -285,15 +291,15 @@ function getTakeOutString(userGameWalletInfo) {
     sqlStringUpdate2 = mysql.format(sqlStringUpdate2, values);
 
     let sqlStringTrans1 = ` INSERT INTO GameTransaction 
-                            (uid, transTypeCode, amount, gameId, agentId, storeId)
-                            VALUES (?, ?, ?, ?, ?, ?);`;
-    values = [userGameWalletInfo.uid, 5, userGameWalletInfo.balance * -1, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+                            (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                            VALUES (?, ?, ?, ?, ?, ?, ?);`;
+    values = [userGameWalletInfo.uid, 5, userGameWalletInfo.balance * -1, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
     sqlStringTrans1 = mysql.format(sqlStringTrans1, values);
 
     let sqlStringTrans2 = ` INSERT INTO StoreTransaction 
                             (uid, transTypeCode, amount, relatedId, relatedName, storeId, comment)
                             VALUES (?, ?, ?, ?, ?, ?, ?);`;
-    values = [userGameWalletInfo.uid, 5, storeCurrencyAmount, userGameWalletInfo.gameId, userGameWalletInfo.gameName, userGameWalletInfo.storeId, ''];
+    values = [userGameWalletInfo.uid, 5, storeCurrencyAmount, userGameWalletInfo.uid, userGameWalletInfo.name, userGameWalletInfo.storeId, userGameWalletInfo.gameName];
     sqlStringTrans2 = mysql.format(sqlStringTrans2, values);
 
     return sqlStringUpdate1 + sqlStringUpdate2 + sqlStringTrans1 + sqlStringTrans2;
@@ -326,16 +332,19 @@ function takeInValidator(){
             .trim(), // trim white space from both end 
         
         // Check gameId
+        // Store must possess this game
         body('gameId').custom(async function(data, {req}){
+            const { storeId } = req.body;
             // Prepare query
-            // Remeber to use charset utf8mb4_bin in DB
-            let sqlString =`SELECT id
-                            FROM GameInfo 
-                            WHERE id=?`;
-            let values = [data];
+            let sqlString =`SELECT G.id
+                            FROM GameInfo AS G
+                            INNER JOIN StoreGame AS SG
+                                ON G.id=SG.gameId
+                            WHERE G.id=? AND SG.storeId=?`;
+            let values = [data, storeId];
             sqlString = mysql.format(sqlString, values);
 
-            // Check if duplicate account exists
+            // Check if the store has this game
             let results;
             try {
                 results = await sqlAsync.query(req.db, sqlString);
@@ -345,7 +354,7 @@ function takeInValidator(){
                 throw Error('Server 錯誤');
             }
 
-            if(results.length <= 0) throw Error('遊戲不存在');
+            if(results.length <= 0) throw Error('商家不存在此遊戲');
 
             return true;
         }),

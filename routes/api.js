@@ -10,7 +10,7 @@ let router = express.Router();
 const { auth, user, info, store, wallet, friend, game } = require('../controllers/api');
 
 // Check login
-router.use(/\/(user|info|store|wallet|friend|game).*/, auth.isLogin); // used on all routes, except auth
+router.use(/^\/(user|info|store|wallet|friend|game).*/, auth.isLogin); // used on all routes, except auth
 
 // Register routes to a router
 // Auth routes

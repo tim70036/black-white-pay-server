@@ -18,29 +18,36 @@ function init(app) {
     app.use('/api', apiRoute);
     app.use('/game', gameRoute);
 
-    // Error Handling
+    // Invalid url path
     app.use(function(req, res, next) {
-        let err = new Error(`${req.ip} tried to reach ${req.originalUrl}`); // Tells us which IP tried to reach a particular URL
+        let err = new Error(`${req.ip} tried to reach ${req.originalUrl}`);
         err.statusCode = 404;
-        err.shouldRedirect = true; //New property on err so that our middleware will redirect
+        err.userMessage = `${req.originalUrl} is an invalid url.`;
         next(err);
     });
 
+    // Specific /api Error Handling
+    app.use('/api', function(err, req, res, next) {
+        req.logger.error(err.message);
+        return res.json({ errCode: 1, msg: err.userMessage });
+    });
+
+    // General Error Handling
     app.use(function(err, req, res, next) {
         
         req.logger.error(err.message);
         
         if (!err.statusCode) err.statusCode = 500; // Sets a generic server error status code if none is part of the err
-      
-        if (err.shouldRedirect) {
-            let error = {
-                statusCode : err.statusCode,
-                message : `${req.originalUrl} is an invalid url.`,
-            }
-            res.render('home/error', {error : error}); // Renders a my error page for the user
+ 
+        if (req.xhr) {
+            return res.json({
+                errCode: 1, // API format
+                err: true, // Web old format
+                msg: err.userMessage
+            });
         } else {
-          res.status(err.statusCode).send(err.message); // If shouldRedirect is not defined in our error, sends our original err data
-        }
+            return res.render('home/error', {error : err}); // Renders a my error page for the user
+        } 
     });
       
 

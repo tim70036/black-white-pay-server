@@ -96,7 +96,7 @@ let balanceHandler = async function(req, res, next) {
     // User not found
     if(results.length <= 0) return res.json(responseMessage(null, '1006', 'User Not Found'));
 
-    const resData = { balance: results[0].balance, currency: 'TWD' };
+    const resData = { balance: results[0].balance, currency: 'CNY' };
     return res.json(responseMessage(resData, '0', 'Success'));    
 };
 
@@ -196,7 +196,7 @@ let takeAllHandler = async function(req, res, next) {
             },
             before: userGameWalletInfo.balance,
             balance: 0,
-            currency: 'TWD',
+            currency: 'CNY',
             event: [
                 {
                     mtcode: mtcode,
@@ -237,9 +237,9 @@ let takeAllHandler = async function(req, res, next) {
         values = [userGameWalletInfo.balance, userGameWalletInfo.balance, account];
         sqlStringUpdate = mysql.format(sqlStringUpdate, values);
     
-        let sqlStringTrans = `  INSERT INTO GameTransaction (uid, transTypeCode, amount, gameId, agentId, storeId)
-                                VALUES (?, ?, ?, ?, ?, ?);`;
-        values = [userGameWalletInfo.uid, 1, userGameWalletInfo.balance * -1, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+        let sqlStringTrans = `  INSERT INTO GameTransaction (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                                VALUES (?, ?, ?, ?, ?, ?, ?);`;
+        values = [userGameWalletInfo.uid, 1, userGameWalletInfo.balance * -1, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
         sqlStringTrans = mysql.format(sqlStringTrans, values);
 		
         await sqlAsync.query(req.db, sqlStringUpdate + sqlStringTrans);
@@ -249,7 +249,7 @@ let takeAllHandler = async function(req, res, next) {
         // Log
         req.logger.verbose(`user game wallet id[${account}] take all balance[${userGameWalletInfo.balance}] mtcode[${mtcode}]`);
 
-        const resData = { amount: userGameWalletInfo.balance, balance: 0, currency: 'TWD' };
+        const resData = { amount: userGameWalletInfo.balance, balance: 0, currency: 'CNY' };
         return res.json(responseMessage(resData, '0', 'Success'));    
 	}
 	catch (error) {
@@ -340,7 +340,7 @@ let betHandler = async function(req, res, next) {
             },
             before: userGameWalletInfo.balance,
             balance: postBalance,
-            currency: 'TWD',
+            currency: 'CNY',
             event: [
                 {
                     mtcode: mtcode,
@@ -381,9 +381,9 @@ let betHandler = async function(req, res, next) {
         values = [amount, amount, account];
         sqlStringUpdate = mysql.format(sqlStringUpdate, values);
     
-        let sqlStringTrans = `  INSERT INTO GameTransaction (uid, transTypeCode, amount, gameId, agentId, storeId)
-                                VALUES (?, ?, ?, ?, ?, ?);`;
-        values = [userGameWalletInfo.uid, 1, amount * -1, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+        let sqlStringTrans = `  INSERT INTO GameTransaction (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                                VALUES (?, ?, ?, ?, ?, ?, ?);`;
+        values = [userGameWalletInfo.uid, 1, amount * -1, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
         sqlStringTrans = mysql.format(sqlStringTrans, values);
 		
         await sqlAsync.query(req.db, sqlStringUpdate + sqlStringTrans);
@@ -393,7 +393,7 @@ let betHandler = async function(req, res, next) {
         // Log
         req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] bet amount[${amount}] mtcode[${mtcode}]`);
 
-        const resData = { balance: postBalance, currency: 'TWD' };
+        const resData = { balance: postBalance, currency: 'CNY' };
         return res.json(responseMessage(resData, '0', 'Success'));    
 	}
 	catch (error) {
@@ -484,7 +484,7 @@ let rollOutHandler = async function(req, res, next) {
             },
             before: userGameWalletInfo.balance,
             balance: postBalance,
-            currency: 'TWD',
+            currency: 'CNY',
             event: [
                 {
                     mtcode: mtcode,
@@ -525,9 +525,9 @@ let rollOutHandler = async function(req, res, next) {
         values = [amount, amount, account];
         sqlStringUpdate = mysql.format(sqlStringUpdate, values);
     
-        let sqlStringTrans = `  INSERT INTO GameTransaction (uid, transTypeCode, amount, gameId, agentId, storeId)
-                                VALUES (?, ?, ?, ?, ?, ?);`;
-        values = [userGameWalletInfo.uid, 1, amount * -1, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+        let sqlStringTrans = `  INSERT INTO GameTransaction (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                                VALUES (?, ?, ?, ?, ?, ?, ?);`;
+        values = [userGameWalletInfo.uid, 1, amount * -1, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
         sqlStringTrans = mysql.format(sqlStringTrans, values);
 		
         await sqlAsync.query(req.db, sqlStringUpdate + sqlStringTrans);
@@ -537,7 +537,7 @@ let rollOutHandler = async function(req, res, next) {
         // Log
         req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] rollout amount[${amount}] mtcode[${mtcode}]`);
 
-        const resData = { balance: postBalance, currency: 'TWD' };
+        const resData = { balance: postBalance, currency: 'CNY' };
         return res.json(responseMessage(resData, '0', 'Success'));   
 	}
 	catch (error) {
@@ -552,7 +552,7 @@ let rollOutHandler = async function(req, res, next) {
 // Resolve
 let rollInHandler = async function(req, res, next) {
     const result = validationResult(req);
-
+    console.log(req.body);
     // If the form data is invalid
     if (!result.isEmpty()) {
         // Return the first error to client
@@ -578,7 +578,11 @@ let rollInHandler = async function(req, res, next) {
     } = req.body;
 
     // Covert data
+    bet = Number(bet);
+    win = Number(win);
     amount = Number(amount);
+    winpc = Number(winpc);
+    rake = Number(rake);
 
     // Check mtcode(record cannot be duplicated)
     try {
@@ -609,11 +613,18 @@ let rollInHandler = async function(req, res, next) {
     // User not found
     if(results.length <= 0) return res.json(responseMessage(null, '1006', 'User Not Found'));
 
-
     // Caculate profit
     const userGameWalletInfo = results[0];
     const postBalance = userGameWalletInfo.balance + amount;
-    const profit = userGameWalletInfo.frozenBalance - amount;
+    let profit;
+    if (gametype === 'table') {
+        profit = rake - winpc;
+    } else { // 'arcade', 'fish', 'slot'
+        profit = userGameWalletInfo.frozenBalance - amount;
+    }
+
+    console.log({amount, profit, postBalance});
+     
 
     // Prepare mt reocrd
     let mtRecord = {
@@ -630,7 +641,7 @@ let rollInHandler = async function(req, res, next) {
         },
         before: userGameWalletInfo.balance,
         balance: postBalance,
-        currency: 'TWD',
+        currency: 'CNY',
         event: [
             {
                 mtcode: mtcode,
@@ -657,15 +668,15 @@ let rollInHandler = async function(req, res, next) {
     sqlStringUpdate2 = mysql.format(sqlStringUpdate2, values);
 
     let sqlStringTrans1 = ` INSERT INTO GameTransaction
-                            (uid, transTypeCode, amount, gameId, agentId, storeId)
-                            VALUES (?, ?, ?, ?, ?, ?);`;
-    values = [userGameWalletInfo.uid, 2, amount, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+                            (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                            VALUES (?, ?, ?, ?, ?, ?, ?);`;
+    values = [userGameWalletInfo.uid, 2, amount, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
     sqlStringTrans1 = mysql.format(sqlStringTrans1, values);
 
     let sqlStringTrans2 = ` INSERT INTO GameTransaction
-                            (uid, transTypeCode, amount, gameId, agentId, storeId)
-                            VALUES ((SELECT uid FROM AgentInfo WHERE id=?), ?, ?, ?, ?, ?);`;
-    values = [userGameWalletInfo.agentId, 2, profit, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+                            (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                            VALUES ((SELECT uid FROM AgentInfo WHERE id=?), ?, ?, ?, ?, ?, ?);`;
+    values = [userGameWalletInfo.agentId, 2, profit, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
     sqlStringTrans2 = mysql.format(sqlStringTrans2, values);
 
     // Execute transaction
@@ -685,19 +696,22 @@ let rollInHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] roll in amount[${amount}] profit[${profit}] mtcode[${mtcode}]`);
 
-    const resData = { balance: postBalance, currency: 'TWD' };
+    const resData = { balance: postBalance, currency: 'CNY' };
     return res.json(responseMessage(resData, '0', 'Success'));  
 };
 
 let endRoundHandler = async function(req, res, next) {
     const result = validationResult(req);
-
+    console.log(req.body);
     // If the form data is invalid
     if (!result.isEmpty()) {
         // Return the first error to client
         let firstError = result.array()[0].msg;
+        console.log({firstError});
         return res.json(responseMessage(null, '1003', firstError));
     }
+
+    
 
     // Gather all required data
     let {
@@ -710,8 +724,11 @@ let endRoundHandler = async function(req, res, next) {
     } = req.body;
 
     // Covert data
+    data = JSON.parse(data);
     const amount = data.reduce( (sum, curData) => (sum + Number(curData.amount)), 0 );
     const mtcodes = data.map(curData => curData.mtcode);
+
+    console.log({amount});
     
     // Check mtcode(record cannot be duplicated)
     try {
@@ -768,7 +785,7 @@ let endRoundHandler = async function(req, res, next) {
             },
             before: userGameWalletInfo.balance,
             balance: postBalance,
-            currency: 'TWD',
+            currency: 'CNY',
             event: [ ...data ]
         }
     }));
@@ -790,15 +807,15 @@ let endRoundHandler = async function(req, res, next) {
     sqlStringUpdate2 = mysql.format(sqlStringUpdate2, values);
 
     let sqlStringTrans1 = ` INSERT INTO GameTransaction
-                            (uid, transTypeCode, amount, gameId, agentId, storeId)
-                            VALUES (?, ?, ?, ?, ?, ?);`;
-    values = [userGameWalletInfo.uid, 2, amount, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+                            (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                            VALUES (?, ?, ?, ?, ?, ?, ?);`;
+    values = [userGameWalletInfo.uid, 2, amount, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
     sqlStringTrans1 = mysql.format(sqlStringTrans1, values);
 
     let sqlStringTrans2 = ` INSERT INTO GameTransaction
-                            (uid, transTypeCode, amount, gameId, agentId, storeId)
-                            VALUES ((SELECT uid FROM AgentInfo WHERE id=?), ?, ?, ?, ?, ?);`;
-    values = [userGameWalletInfo.agentId, 2, profit, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+                            (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                            VALUES ((SELECT uid FROM AgentInfo WHERE id=?), ?, ?, ?, ?, ?, ?);`;
+    values = [userGameWalletInfo.agentId, 2, profit, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
     sqlStringTrans2 = mysql.format(sqlStringTrans2, values);
 
     // Execute transaction
@@ -825,7 +842,7 @@ let endRoundHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] endround amount[${amount}] profit[${profit}] mtcode[${mtcodes[0]}]`);
 
-    const resData = { balance: postBalance, currency: 'TWD' };
+    const resData = { balance: postBalance, currency: 'CNY' };
     return res.json(responseMessage(resData, '0', 'Success'));  
 };
 
@@ -903,9 +920,9 @@ let refundHandler = async function(req, res, next) {
     values = [amount, amount, account];
     sqlStringUpdate = mysql.format(sqlStringUpdate, values);
 
-    let sqlStringTrans = `  INSERT INTO GameTransaction (uid, transTypeCode, amount, gameId, agentId, storeId)
-                            VALUES (?, ?, ?, ?, ?, ?);`;
-    values = [userGameWalletInfo.uid, 3, amount, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+    let sqlStringTrans = `  INSERT INTO GameTransaction (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                            VALUES (?, ?, ?, ?, ?, ?, ?);`;
+    values = [userGameWalletInfo.uid, 3, amount, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
     sqlStringTrans = mysql.format(sqlStringTrans, values);
 
     // Execute transaction
@@ -925,7 +942,7 @@ let refundHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] refund amount[${amount}] mtcode[${mtcode}]`);
 
-    const resData = { balance: postBalance, currency: 'TWD' };
+    const resData = { balance: postBalance, currency: 'CNY' };
     return res.json(responseMessage(resData, '0', 'Success'));   
 };
 
@@ -1005,7 +1022,7 @@ let debitHandler = async function(req, res, next) {
         },
         before: userGameWalletInfo.balance,
         balance: postBalance,
-        currency: 'TWD',
+        currency: 'CNY',
         event: [
             {
                 mtcode: mtcode,
@@ -1028,7 +1045,7 @@ let debitHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] debit amount[${amount}] but do nothing`);
 
-    const resData = { balance: postBalance, currency: 'TWD' };
+    const resData = { balance: postBalance, currency: 'CNY' };
     return res.json(responseMessage(resData, '0', 'Success'));  
 };
 
@@ -1107,7 +1124,7 @@ let creditHandler = async function(req, res, next) {
         },
         before: userGameWalletInfo.balance,
         balance: postBalance,
-        currency: 'TWD',
+        currency: 'CNY',
         event: [
             {
                 mtcode: mtcode,
@@ -1130,7 +1147,7 @@ let creditHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] credit amount[${amount}] but do nothing`);
 
-    const resData = { balance: postBalance, currency: 'TWD' };
+    const resData = { balance: postBalance, currency: 'CNY' };
     return res.json(responseMessage(resData, '0', 'Success'));  
 };
 
@@ -1204,7 +1221,7 @@ let payOffHandler = async function(req, res, next) {
         },
         before: userGameWalletInfo.balance,
         balance: postBalance,
-        currency: 'TWD',
+        currency: 'CNY',
         event: [
             {
                 mtcode: mtcode,
@@ -1214,7 +1231,7 @@ let payOffHandler = async function(req, res, next) {
         ]
     };
 
-    // Prepare query, roll in money to user and agent
+    // Prepare query, roll in money to user
     let sqlStringUpdate1 = `    UPDATE UserGameWallet 
                                 SET balance=balance+?,
                                 WHERE id=?;`;
@@ -1222,13 +1239,13 @@ let payOffHandler = async function(req, res, next) {
     sqlStringUpdate1 = mysql.format(sqlStringUpdate1, values);
 
     let sqlStringTrans1 = ` INSERT INTO GameTransaction
-                            (uid, transTypeCode, amount, gameId, agentId, storeId)
-                            VALUES (?, ?, ?, ?, ?, ?);`;
-    values = [userGameWalletInfo.uid, 6, amount, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+                            (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                            VALUES (?, ?, ?, ?, ?, ?, ?);`;
+    values = [userGameWalletInfo.uid, 6, amount, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
     sqlStringTrans1 = mysql.format(sqlStringTrans1, values);
 
     // Execute transaction
-	// Roll in 
+	// Payoff
 	try {
 		await sqlAsync.query(req.db, 'START TRANSACTION');
         await sqlAsync.query(req.db, sqlStringUpdate1 + sqlStringTrans1);
@@ -1244,7 +1261,7 @@ let payOffHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] payoff amount[${amount}] mtcode[${mtcode}]`);
 
-    const resData = { balance: postBalance, currency: 'TWD' };
+    const resData = { balance: postBalance, currency: 'CNY' };
     return res.json(responseMessage(resData, '0', 'Success'));  
 };
 
@@ -1399,6 +1416,10 @@ function rollOutValidator(){
 function endRoundValidator(){
     return [
         // Check format
+        // All values must be string
+        body('*')
+            .isString().withMessage('Wrong data format'),
+
         // For each in data array
         body('account')
             .isLength({ min:1 }).withMessage('Account Is Required')
@@ -1413,21 +1434,27 @@ function endRoundValidator(){
             .isLength({ min:1 }).withMessage('RoundId Is Required')
             .isLength({ max:50 }).withMessage('RoundId Exceed Max Len 50'),
         body('data')
-            .isArray().withMessage('Data Is Required'),
-        body('data.*.amount')
-            .isFloat({ min: 0 }).withMessage('Amount Invalid'),
-        body('data.*.mtcode')
-            .isLength({ min:1 }).withMessage('MtCode Is Required')
-            .isLength({ max:70 }).withMessage('MtCode Exceed Max Len 70'),
-        body('data.*.eventTime')
-            .isLength({ min:1 }).withMessage('EventTime Is Required')
-            .isLength({ max:35 }).withMessage('EventTime Exceed Max Len 35'),
-        
+            .isLength({ min:1 }).withMessage('Data Is Required')
+            .isLength({ max:999999 }).withMessage('Data Exceed Max Len 999999'),
 
-        // Sanitize all values 
-        sanitizeBody('*')
+        // Special case: data constains an array of JSON string, if we escape "" then GG
+        // Sanitize 
+        sanitizeBody(['account', 'gamehall', 'gamecode', 'roundid'])
             .escape() // Esacpe characters to prevent XSS attack, replace <, >, &, ', " and / with HTML entities
             .trim(), // trim white space from both end 
+
+        body('data').custom(async function(data, {req}){
+            const dataArray = JSON.parse(data);
+            dataArray.forEach(element => {
+                if (element.amount < 0) throw Error('Amount Invalid');
+                if (element.mtcode.length <= 0) throw Error('MtCode Is Required'); 
+                if (element.mtcode.length > 70) throw Error('MtCode Exceed Max Len 70'); 
+                if (element.eventtime.length <= 0) throw Error('EventTime Is Required'); 
+                if (element.eventtime.length > 35) throw Error('EventTime Exceed Max Len 35'); 
+                // FK you CQ9, eventtime vs. eventTime ?
+            });
+            return true;
+        }),
     ];
 }
 

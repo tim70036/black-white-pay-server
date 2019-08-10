@@ -11,47 +11,47 @@ const { dashboard, personnel, storeCurrency, mainCurrency, report, info, account
 
 
 // Check login
-router.use(/\/(dashboard|personnel|storeCurrency|mainCurrency|report|info|account|detail).*/, auth.isLogin); // used on all pages, except login
+router.use(/^\/(dashboard|personnel|storeCurrency|mainCurrency|report|info|account|detail).*/, auth.isLogin); // used on all pages, except login
 
 // User connection info
-router.use(/\/(dashboard|personnel|storeCurrency|mainCurrency|report|info|account|detail).*/, auth.connectionInfo); // used on all pages, except login
+router.use(/^\/(dashboard|personnel|storeCurrency|mainCurrency|report|info|account|detail).*/, auth.connectionInfo); // used on all pages, except login
 
 // Authorize personnel
 // Special case : delete
-router.use(/\/personnel\/store\/delete.*/, auth.allowRole('admin'));
-router.use(/\/personnel\/agent\/delete.*/, auth.allowRole('admin'));
-router.use(/\/personnel\/member\/delete.*/, auth.allowRole('admin', 'store', 'agent'));
+router.use(/^\/personnel\/store\/delete.*/, auth.allowRole('admin'));
+router.use(/^\/personnel\/agent\/delete.*/, auth.allowRole('admin'));
+router.use(/^\/personnel\/member\/delete.*/, auth.allowRole('admin', 'store', 'agent'));
 // General case : other operations
-router.use(/\/personnel\/store\/.*/, auth.allowRole('admin'));
-router.use(/\/personnel\/agent\/.*/, auth.allowRole('admin', 'store'));
-router.use(/\/personnel\/member\/.*/, auth.allowRole('admin', 'store', 'agent'));
-router.use(/\/personnel\/user\/.*/, auth.allowRole('admin'));
-router.use(/\/personnel\/verify\/.*/, auth.allowRole('store'));
+router.use(/^\/personnel\/store\/.*/, auth.allowRole('admin'));
+router.use(/^\/personnel\/agent\/.*/, auth.allowRole('admin', 'store'));
+router.use(/^\/personnel\/member\/.*/, auth.allowRole('admin', 'store', 'agent'));
+router.use(/^\/personnel\/user\/.*/, auth.allowRole('admin'));
+router.use(/^\/personnel\/verify\/.*/, auth.allowRole('store'));
 
 // Authorize storeCurrency  
-router.use(/\/storeCurrency\/autoTransfer\/.*/, auth.allowRole('admin', 'store'));
-router.use(/\/storeCurrency\/transfer\/.*/, auth.allowRole('admin', 'store', 'agent', 'member'));
-router.use(/\/storeCurrency\/history\/.*/, auth.allowRole('admin', 'store', 'agent', 'member'));
+router.use(/^\/storeCurrency\/autoTransfer\/.*/, auth.allowRole('admin', 'store'));
+router.use(/^\/storeCurrency\/transfer\/.*/, auth.allowRole('admin', 'store', 'agent', 'member'));
+router.use(/^\/storeCurrency\/history\/.*/, auth.allowRole('admin', 'store', 'agent', 'member'));
 
 // Authorize mainCurrency
-router.use(/\/mainCurrency\/transfer\/.*/, auth.allowRole('admin'));
-router.use(/\/mainCurrency\/history\/.*/, auth.allowRole('admin'));
-router.use(/\/mainCurrency\/exchange\/.*/, auth.allowRole('admin'));
-router.use(/\/mainCurrency\/exchange-history\/.*/, auth.allowRole('admin', 'store', 'agent'));
+router.use(/^\/mainCurrency\/transfer\/.*/, auth.allowRole('admin'));
+router.use(/^\/mainCurrency\/history\/.*/, auth.allowRole('admin'));
+router.use(/^\/mainCurrency\/exchange\/.*/, auth.allowRole('admin'));
+router.use(/^\/mainCurrency\/exchange-history\/.*/, auth.allowRole('admin', 'store', 'agent'));
 
 //Authorize report            
-router.use(/\/report\/revenue\/.*/, auth.allowRole('admin', 'store'));
+router.use(/^\/report\/revenue\/.*/, auth.allowRole('admin', 'store'));
       
 //Authorize detail            
-router.use(/\/detail\/announcement\/.*/, auth.allowRole('admin'));
-router.use(/\/detail\/ad\/.*/, auth.allowRole('store'));
+router.use(/^\/detail\/announcement\/.*/, auth.allowRole('admin'));
+router.use(/^\/detail\/ad\/.*/, auth.allowRole('store'));
       
 //Authorize info
-router.use(/\/info\/announcement\/.*/, auth.allowRole('admin'));
-router.use(/\/info\/ad\/.*/, auth.allowRole('store'));
+router.use(/^\/info\/announcement\/.*/, auth.allowRole('admin'));
+router.use(/^\/info\/ad\/.*/, auth.allowRole('store'));
 
 //Authorize account
-router.use(/\/account\/retrieve\/.*/, auth.allowRole('admin', 'store'));
+router.use(/^\/account\/retrieve\/.*/, auth.allowRole('admin', 'store'));
 
 // Auth routes
 router.post('/auth/login', auth.loginValidate, auth.login);

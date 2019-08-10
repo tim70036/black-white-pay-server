@@ -7,10 +7,6 @@ const
     {promisify} = require('util'),
     expressBrute = require('express-brute'),
     expressBruteStore = require('express-brute-redis');
-    
-
-
-
 
 async function init(app){
 
@@ -75,12 +71,25 @@ async function init(app){
     // Express-session
     // Config express to use express-session based on redis store
     let sessionStore = new redisStore({ client : client });
-    app.use(session({
+
+    // Session on all route except /api... 
+    app.use(/^(?!\/api).*$/, session({
         store: sessionStore, // use redis store
         secret: process.env.SESS_KEY, // key for encrypting signed cookie
         resave: false,
         saveUninitialized: false,
-        cookie: {maxAge: 12 * 3600000}, // session will expire after 12 hours
+        cookie: {maxAge: 24 * 3600000}, // session will expire after 24 hours
+        genid: (req) => {
+            return uuid(); // use UUIDs for session IDs
+        }
+    }));
+    // Session on /api route
+    app.use(/^\/api.*$/, session({
+        store: sessionStore, // use redis store
+        secret: process.env.SESS_KEY, // key for encrypting signed cookie
+        resave: false,
+        saveUninitialized: false,
+        cookie: {maxAge: 7 * 24 * 3600000}, // session will expire after 7 days
         genid: (req) => {
             return uuid(); // use UUIDs for session IDs
         }
@@ -93,30 +102,55 @@ async function init(app){
         client : client,
         prefix : 'reqInfo:',
     });
-    // Init, at most 30 req in 30 sec
-    let brute = new expressBrute(bruteStore, {
+
+    // General prevention for same IP
+    let globalBrute = new expressBrute(bruteStore, {
         freeRetries: 30,  // The valid number of request from the user before they need to start waiting
-        minWait: 30*1000, // 30 sec
-        maxWait: 30*1000, // 30 sec
-        lifetime: 30,     // The length of time (in seconds since the last request) to remember the number of requests that have been made by an IP. 
+        // Begin to wait from last request 
+        minWait: 10*60*1000, // 10 min
+        maxWait: 10*60*1000, // 10 min
+        lifetime: 30,     // Start from first request. After this period of time(sec), the record will be gone and the record of this IP can start over again (reset request count to 0 and wait time to minWait)
         attachResetToRequest: false,
         refreshTimeoutOnRequest: false,  // Defines whether the lifetime counts from the time of the last request that ExpressBrute didn't prevent for a given IP (true) or from of that IP's first request (false)
-        failCallback : failCallback,
+        failCallback : globalFailCallback,
         handleStoreError : handleStoreError,
     });
 
-    // Config express to use Express-brute
-    app.use(brute.prevent);
+    // Auth prevention for same IP + same account
+    let authBrute = new expressBrute(bruteStore, {
+        freeRetries: 3,
+        minWait: 3*60*1000, // 3 minutes
+        maxWait: 12*60*60*1000, // 12 hour
+        lifetime: 24*60*60, // 1 day
+        failCallback: authFailCallback,
+        handleStoreError: handleStoreError
+    });
+
+    // Config express to use Express-brute on different routes
+    // Use on all route except /game/...
+    app.use(/^(?!\/game).*$/, globalBrute.prevent); 
+    // Use on auth route, stricter prevent
+    app.use(/^((\/home\/auth\/login)|(\/api\/auth\/login))/, authBrute.getMiddleware({
+        key: function(req, res, next) {
+            // prevent too many attempts for the same account
+            // reset when login success
+            next(req.body.account);
+        }
+    })); 
 }
 
-let failCallback = function (req, res, next) {
-    req.logger.warn(`${req.ip} made too many request in a short period of time, now blocked`);
-    
-    let error = {
-        statusCode : 404,
-        message : '操作次數過多, 請稍後再試',
-    };
-    res.render('home/error',{error: error}); // brute force protection triggered
+let globalFailCallback = function (req, res, next) { 
+    let err = new Error(`${req.ip} made too many request in a short period of time, now blocked`);
+    err.statusCode = 429;
+    err.userMessage = `操作次數過多, 請稍後再試`;
+    next(err); // Let error handling contoller deal with this 
+};
+
+let authFailCallback = function (req, res, next) { 
+    let err = new Error(`${req.ip} login failed with account[${req.body.account}] too many times in a short period of time, now blocked`);
+    err.statusCode = 429;
+    err.userMessage = `登入失敗次數過多, 請稍後再試`;
+    next(err); // Let error handling contoller deal with this 
 };
 
 let handleStoreError = function (error) {

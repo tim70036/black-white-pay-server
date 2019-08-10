@@ -32,8 +32,12 @@ let loginHandler = function(req,res, next) {
 
         // Authentication success, make passport logIn manually
         req.logIn(user, function(err) {
-            if (err) { return next(err); }
-            return res.status(200).json({errCode : 0});
+            if (err) return res.json({ errCode : 2, msg: 'Server 錯誤' });
+
+            // Reset brute prevention
+            req.brute.reset(function () {
+                return res.json({ errCode : 0, msg: 'success'});
+            });
         });
 
     })(req, res, next); // pass req, res, next into passport

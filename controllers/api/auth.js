@@ -255,7 +255,11 @@ let loginHandler = function(req,res, next) {
             if (err) {
                 return res.json({ errCode : 2, msg: 'Server 錯誤' });
             }
-            return res.json({ errCode : 0, msg: 'success', data: user });
+
+            // Reset brute prevention
+            req.brute.reset(function () {
+                return res.json({ errCode : 0, msg: 'success', data: user });
+            });  
         });
 
     })(req, res, next); // pass req, res, next into passport

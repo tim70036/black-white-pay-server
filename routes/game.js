@@ -9,7 +9,7 @@ let router = express.Router();
 const { cq9 } = require('../controllers/game');
 
 // Check auth
-router.use(/\/(cq9).*/, cq9.isAuthorized); 
+router.use(/^\/(cq9).*/, cq9.isAuthorized); 
 
 // Register routes to a router
 // CQ9 routes
