@@ -66,6 +66,40 @@ let adHandler = async function(req, res, next) {
     return res.json({ errCode : 0, msg: 'success', data: adList });
 };
 
+let commentHandler = async function(req, res, next) {
+    const result = validationResult(req);
+    // If the form data is invalid
+    if (!result.isEmpty()) {
+        // Return the first error to client
+        let firstError = result.array()[0].msg;
+        return res.json({ errCode: 1, msg: firstError });
+    }
+
+    // Gather all required data
+    const { storeId } = req.body;
+
+    let sqlString = `
+                      SELECT Mem.comment
+                      From MemberInfo AS Mem
+                      INNER JOIN AgentInfo AS Ag
+                          ON Mem.agentId=Ag.id
+                      INNER JOIN StoreInfo AS Store
+                          ON Store.id=Ag.storeId
+                      WHERE Mem.uid=? AND Store.id=?
+                  `;
+    let values = [req.user.id, storeId];
+    sqlString = mysql.format(sqlString, values);
+
+    let results;
+    try {
+        results = await sqlAsync.query(req.db, sqlString);
+    } catch (error) {
+        req.logger.error(`${error.message}`);
+        return res.json({ errCode : 2, msg: 'Server 錯誤' });
+    }
+    return res.json({ errCode : 0, msg: 'success', data: results[0].comment });
+};
+
 let bindHandler = async function(req, res, next){
     const result = validationResult(req);
     // If the form data is invalid
@@ -125,6 +159,26 @@ let bindHandler = async function(req, res, next){
 // Form data validate generators
 // Invoke it to produce a middleware for validating
 function adValidator() {
+	return [
+		// All values must be string
+		body('*')
+			.isString().withMessage('Wrong data format'),
+
+		// For each in data array
+		body('storeId')
+			.isLength({ min: 1 }).withMessage('storeId 不可爲空')
+			.isLength({ max: 200 }).withMessage('storeId 長度不可超過 200')
+			.isInt({ min: -1 }).withMessage('storeId必須是數字'),
+
+		// Sanitize all values 
+		sanitizeBody('*')
+			.escape() // Esacpe characters to prevent XSS attack, replace <, >, &, ', " and / with HTML entities
+			.trim(), // trim white space from both end 
+
+	];
+}
+
+function commentValidator() {
 	return [
 		// All values must be string
 		body('*')
@@ -214,4 +268,6 @@ module.exports = {
     adValidate: adValidator(),
     bind: bindHandler,
     bindValidate: bindValidator(),
+    comment: commentHandler,
+    commentValidate: commentValidator(),
 };

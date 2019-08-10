@@ -48,6 +48,7 @@ router.post('/info/notification/push-token', info.pushTokenValidate, info.pushTo
 router.get('/store/list', store.list);
 router.post('/store/ad', store.adValidate, store.ad);
 router.post('/store/bind', store.bindValidate, store.bind);
+router.post('/store/comment', store.commentValidate, store.comment);
 
 // Wallet routes
 router.get('/wallet/list', wallet.list); 
