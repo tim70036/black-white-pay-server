@@ -70,7 +70,9 @@ router.post('/friend/request/create', friend.request.createValidate, friend.requ
 router.post('/friend/request/cancel', friend.request.cancelValidate, friend.request.cancel);
 
 // Game routes
+router.get('/game/wallet/list', game.wallet.list);
 router.post('/game/wallet/take-in', game.wallet.takeInValidate, game.wallet.takeIn);
 router.post('/game/wallet/take-out', game.wallet.takeOutValidate, game.wallet.takeOut);
+router.post('/game/wallet/take-out-all', game.wallet.takeOutAll);
 
 module.exports = router;

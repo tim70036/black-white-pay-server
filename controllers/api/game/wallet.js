@@ -8,6 +8,36 @@ const
 // However we cannot block if the number after exchange <= 0 in take-out
 // Because user will need to change their currency, and need to take out whatever it happens
 
+let listHandler = async function(req, res, next) {
+    let sqlString = `
+                        SELECT
+                            UGW.gameId AS gameId,
+                            UGW.balance AS balance,
+                            UGW.frozenBalance AS frozenBalance,
+                            G.name AS gameName,
+                            Store.currencyName AS currencyName
+                        FROM UserGameWallet AS UGW
+                        INNER JOIN GameInfo AS G
+                            ON G.id=UGW.gameId
+                        INNER JOIN StoreInfo AS Store
+                            ON Store.id=UGW.storeId
+                        INNER JOIN UserAccount AS U
+                            ON U.id=UGW.uid
+                        WHERE UGW.uid=?
+                    `;
+    let values = [req.user.id];
+    sqlString = mysql.format(sqlString, values);
+
+    let gameWallettList = [];
+    try {
+        gameWallettList = await sqlAsync.query(req.db, sqlString);
+    } catch (error) {
+        req.logger.error(`${error.message}`);
+        return res.json({ errCode : 2, msg: 'Server 錯誤' });
+    }
+    return res.json({ errCode : 0, msg: 'success', data: gameWallettList });
+}
+
 let takeInHandler = async function(req, res, next) {
     const result = validationResult(req);
 
@@ -189,7 +219,7 @@ let takeOutHandler = async function(req, res, next) {
 	// If the form data is invalid
 	if (!result.isEmpty()) {
 		// Return the first error to client
-		let firstError = result.array()[0].msg;
+        let firstError = result.array()[0].msg;
 		return res.json({ errCode: 1, msg: firstError });
     }
 
@@ -259,6 +289,77 @@ let takeOutHandler = async function(req, res, next) {
 
     // Log
     req.logger.verbose(`account[${req.user.account}] role[${req.user.role}] take-out game wallet gameId[${userGameWalletInfo.ganeId}] storeCurrency[${userGameWalletInfo.storeId}] balance[${userGameWalletInfo.balance}]`);
+    
+    return res.json({ errCode: 0, msg: 'success' });
+}
+
+let takeOutAllHandler = async function(req, res, next) {
+    // Prepare query
+    let sqlString = `
+                        SELECT
+                            UGW.id AS id,
+                            UGW.uid AS uid,
+                            U.name AS name,
+                            UGW.gameId AS gameId,
+                            UGW.agentId AS agentId,
+                            UGW.storeId AS storeId,
+                            UGW.balance AS balance,
+                            UGW.frozenBalance AS frozenBalance,
+                            G.name AS gameName,
+                            Store.exchangeRate AS exchangeRate
+                        FROM UserGameWallet AS UGW
+                        INNER JOIN GameInfo AS G
+                            ON UGW.gameId=G.id
+                        INNER JOIN StoreInfo AS Store
+                            ON UGW.storeId=Store.id
+                        INNER JOIN UserAccount AS U
+                            ON UGW.uid=U.id
+                        WHERE UGW.uid=?
+                        ;
+                    `;
+    let values = [req.user.id];
+    sqlString = mysql.format(sqlString, values);
+
+    // Get game wallet info
+    let results;
+    try {
+        results = await sqlAsync.query(req.db, sqlString);
+    } catch (error) {
+        req.logger.error(`${error.message}`);
+        return res.json({ errCode : 2, msg: 'Server 錯誤' });
+    }
+
+    // Ignore wallet that has no moeny to take-out or exists unresolve game
+    let userGameWalletInfos = results.reduce((array, curResult) => {
+        if (curResult.frozenBalance === 0 && curResult.balance > 0) return [...array, curResult];
+        else return array;
+    }, []);
+
+    // Don't need to takeout
+    if (userGameWalletInfos.length <= 0) return res.json({ errCode: 0, msg: 'success' });
+
+
+    // Generate sql string
+    let sqlStrings = '';
+    userGameWalletInfos.forEach((element) => {
+        sqlStrings += getTakeOutString(element)
+    });
+
+    // Execute transaction
+	// Take out all
+	try {
+		await sqlAsync.query(req.db, 'START TRANSACTION');
+		await sqlAsync.query(req.db, sqlStrings);
+	}
+	catch (error) {
+		await sqlAsync.query(req.db, 'ROLLBACK'); // rollback transaction if a statement produce error
+		req.logger.error(`${error.message}`);
+		return res.json({ errCode: 2, msg: 'Server 錯誤' });
+	}
+	await sqlAsync.query(req.db, 'COMMIT');  // commit transaction only if all statement has executed without error
+
+    // Log
+    req.logger.verbose(`account[${req.user.account}] role[${req.user.role}] take-out all game wallet`);
 
     return res.json({ errCode: 0, msg: 'success' });
 }
@@ -408,9 +509,13 @@ function takeOutValidator(){
 }
 
 module.exports = {
+    list: listHandler,
+
     takeIn: takeInHandler,
     takeInValidate: takeInValidator(),
 
     takeOut: takeOutHandler,
     takeOutValidate: takeOutValidator(),
+
+    takeOutAll: takeOutAllHandler,
 };

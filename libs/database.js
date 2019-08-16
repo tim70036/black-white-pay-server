@@ -28,11 +28,11 @@ function init(app) {
     });
 
     pool.on('acquire', function (connection) {
-        app.locals.logger.debug(`MySQL connection ${connection.threadId} acquired from connection pool`);
+        // app.locals.logger.debug(`MySQL connection ${connection.threadId} acquired from connection pool`);
     });
 
     pool.on('release', function (connection) {
-        app.locals.logger.debug(`MySQL connection ${connection.threadId} released, return to connection pool`);
+        // app.locals.logger.debug(`MySQL connection ${connection.threadId} released, return to connection pool`);
     });
 
     pool.on('enqueue', function () {

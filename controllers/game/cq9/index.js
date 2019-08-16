@@ -3,11 +3,11 @@ const
     { sanitizeBody } = require('express-validator/filter'),
     mysql = require('mysql'),
     moment = require('moment'),
-    signature = require('cookie-signature'),
     sqlAsync = require('../../../libs/sqlAsync');
 
 const mtRedisPrefix = `game:cq9:record:`;
 const mtRedisExpireTime = 72 * 60 * 60; // hour
+const regexRFC3339 = /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)([01][0-9]|2[0-3]):([0-5][0-9]))$/i;
 
 function getCurrentTime() {
     return moment().utcOffset(-240).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ'); // RFC3339 UTC-4
@@ -37,6 +37,7 @@ function parseSessCookie(sessionId) {
     return sessionId;
 }
 
+// Check wtoken in request header
 let isAuthorizedHandler = async function(req, res, next) {
     const token = req.headers.wtoken;
     if (token !== process.env.API_TOKEN_CQ9) {
@@ -48,7 +49,61 @@ let isAuthorizedHandler = async function(req, res, next) {
     return next();
 }
 
+// Check mtcode in request body
+let isValidMtcodeHandler = async function(req, res, next) {
+    // Gather all required data
+    const { mtcode } = req.body;
+    // Check mtcode(record cannot be duplicated)
+    try {
+        const existMtcode = await req.redis.existsAsync(`${mtRedisPrefix}${mtcode}`);
+        if (existMtcode === 1) {
+            req.logger.verbose(`duplicate mtcode[${mtcode}]`);
+            return res.json(responseMessage(null, '2009', 'Duplicated Mtcode'));
+        }   
+    } catch (error) {
+        req.logger.error(`${error.message}`);
+        return res.json(responseMessage(null, '1100', 'Server Error'));
+    }
+    return next();
+}
+
+// Check session in request body
+let isValidSessionHandler = async function(req, res, next) {
+    // Gather all required data
+    const { session } = req.body;
+
+    // Parse cookie session id
+    const sessionKey = parseSessCookie(session);
+    
+    // Check session(this user must login)
+    try {
+        const existSession = await req.redis.existsAsync(`sess:${sessionKey}`);
+        if (existSession === 0) {
+            req.logger.verbose(`invalid session[${sessionKey}]`);
+            return res.json(responseMessage(null, '1003', 'Session Invalid'));
+        }
+    } catch (error) {
+        req.logger.error(`${error.message}`);
+        return res.json(responseMessage(null, '1100', 'Server Error'));
+    }
+    return next();
+}
+
+// Invalid routes
+let invalidRouteHandler = async function(req, res, next) {
+    return res.json(responseMessage(null, '1002', 'Invalid Route'));
+}
+
 let checkPlayerHandler = async function(req, res, next) {
+    const result = validationResult(req);
+
+    // If the form data is invalid
+    if (!result.isEmpty()) {
+        // Return the first error to client
+        let firstError = result.array()[0].msg;
+        return res.json(responseMessage(null, '1003', firstError));
+    }
+
     // Gather all required data
     let { userGameWalletId } = req.params;
 
@@ -66,16 +121,25 @@ let checkPlayerHandler = async function(req, res, next) {
         return res.json(responseMessage(null, '1100', 'Server Error'));
     }
 
-    // User not found
-    if(results.length <= 0) return res.json(responseMessage(null, '1006', 'User Not Found'));
-
     // Log
-    // req.logger.verbose(`check account[${account}]`);
+    req.logger.verbose(`user game wallet id[${userGameWalletId}] checked`);
+    
+    // User not found
+    if(results.length <= 0) return res.json(responseMessage(false, '0', 'Success'));
 
     return res.json(responseMessage(true, '0', 'Success'));
 };
 
 let balanceHandler = async function(req, res, next) {
+    const result = validationResult(req);
+
+    // If the form data is invalid
+    if (!result.isEmpty()) {
+        // Return the first error to client
+        let firstError = result.array()[0].msg;
+        return res.json(responseMessage(null, '1003', firstError));
+    }
+
     // Gather all required data
     let { userGameWalletId } = req.params;
 
@@ -96,11 +160,23 @@ let balanceHandler = async function(req, res, next) {
     // User not found
     if(results.length <= 0) return res.json(responseMessage(null, '1006', 'User Not Found'));
 
+    // Log
+    req.logger.verbose(`user game wallet id[${userGameWalletId}] balance[${results[0].balance}]`);
+
     const resData = { balance: results[0].balance, currency: 'CNY' };
     return res.json(responseMessage(resData, '0', 'Success'));    
 };
 
 let recordHandler = async function(req, res, next) {
+    const result = validationResult(req);
+
+    // If the form data is invalid
+    if (!result.isEmpty()) {
+        // Return the first error to client
+        let firstError = result.array()[0].msg;
+        return res.json(responseMessage(null, '1003', firstError));
+    }
+    
     // Gather all required data
     let { mtcode } = req.params;
 
@@ -126,6 +202,10 @@ let takeAllHandler = async function(req, res, next) {
 
     // If the form data is invalid
     if (!result.isEmpty()) {
+        // Invalid format eventTime needs special msg (but for empty eventTime use regular message)
+        if (result.mapped().eventTime && req.body.eventTime) 
+            return res.json(responseMessage(null, '1004', result.mapped().eventTime.msg));
+        
         // Return the first error to client
         let firstError = result.array()[0].msg;
         return res.json(responseMessage(null, '1003', firstError));
@@ -141,20 +221,6 @@ let takeAllHandler = async function(req, res, next) {
         mtcode,
         session,
     } = req.body;
-
-    // Parse cookie session id
-    const sessionKey = parseSessCookie(session);
-    
-    // Check mtcode(record cannot be duplicated) and session(this user must login)
-    try {
-        const existMtcode = await req.redis.existsAsync(`${mtRedisPrefix}${mtcode}`);
-        const existSession = await req.redis.existsAsync(`sess:${sessionKey}`);
-        if (existMtcode === 1) return res.json(responseMessage(null, '2009', 'Duplicated Mtcode'));
-        if (existSession === 0) return res.json(responseMessage(null, '1003', 'Session Invalid'));
-    } catch (error) {
-        req.logger.error(`${error.message}`);
-        return res.json(responseMessage(null, '1100', 'Server Error'));
-    }
 
     // Prepare query
     let sqlString = `   SELECT
@@ -207,25 +273,15 @@ let takeAllHandler = async function(req, res, next) {
         };
     
         // Not enough balance
-        if (userGameWalletInfo.balance < 0) {
+        if (userGameWalletInfo.balance <= 0) {
             mtRecord.balance = userGameWalletInfo.balance;
             mtRecord.status.status = 'failed';
             mtRecord.status.message = 'Not Enough Balance';
 
             await req.redis.setAsync(`${mtRedisPrefix}${mtcode}`, JSON.stringify(mtRecord), 'EX', mtRedisExpireTime);
             await sqlAsync.query(req.db, 'ROLLBACK');
+            req.logger.verbose(`user game wallet id[${account}] take all balance[${userGameWalletInfo.balance}] but not enough balance mtcode[${mtcode}]`);
             return res.json(responseMessage(null, '1005', 'Not Enough Balance'));
-        }
-    
-        // Still playing
-        if (userGameWalletInfo.frozenBalance !== 0) {
-            mtRecord.balance = userGameWalletInfo.balance;
-            mtRecord.status.status = 'failed';
-            mtRecord.status.message = 'Previous Round Not Resolve';
-
-            await req.redis.setAsync(`${mtRedisPrefix}${mtcode}`, JSON.stringify(mtRecord), 'EX', mtRedisExpireTime);
-            await sqlAsync.query(req.db, 'ROLLBACK');
-            return res.json(responseMessage(null, '1100', 'Previous Round Not Resolve'));
         }
     
         // Preapre query
@@ -264,6 +320,10 @@ let betHandler = async function(req, res, next) {
 
     // If the form data is invalid
     if (!result.isEmpty()) {
+        // Invalid format eventTime needs special msg (but for empty eventTime use regular message)
+        if (result.mapped().eventTime && req.body.eventTime) 
+            return res.json(responseMessage(null, '1004', result.mapped().eventTime.msg));
+
         // Return the first error to client
         let firstError = result.array()[0].msg;
         return res.json(responseMessage(null, '1003', firstError));
@@ -283,20 +343,6 @@ let betHandler = async function(req, res, next) {
 
     // Covert data
     amount = Number(amount);
-
-    // Parse cookie session id
-    const sessionKey = parseSessCookie(session);
-    
-    // Check mtcode(record cannot be duplicated) and session(this user must login)
-    try {
-        const existMtcode = await req.redis.existsAsync(`${mtRedisPrefix}${mtcode}`);
-        const existSession = await req.redis.existsAsync(`sess:${sessionKey}`);
-        if (existMtcode === 1) return res.json(responseMessage(null, '2009', 'Duplicated Mtcode'));
-        if (existSession === 0) return res.json(responseMessage(null, '1003', 'Session Invalid'));
-    } catch (error) {
-        req.logger.error(`${error.message}`);
-        return res.json(responseMessage(null, '1100', 'Server Error'));
-    }
 
     // Prepare query
     let sqlString = `   SELECT
@@ -351,25 +397,15 @@ let betHandler = async function(req, res, next) {
         };
     
         // Not enough balance
-        if (postBalance < 0) {
+        if (postBalance < 0 || userGameWalletInfo.balance <= 0) {
             mtRecord.balance = userGameWalletInfo.balance;
             mtRecord.status.status = 'failed';
             mtRecord.status.message = 'Not Enough Balance';
             
             await req.redis.setAsync(`${mtRedisPrefix}${mtcode}`, JSON.stringify(mtRecord), 'EX', mtRedisExpireTime);
             await sqlAsync.query(req.db, 'ROLLBACK');
+            req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] bet[${amount}] but not enough balance mtcode[${mtcode}]`);
             return res.json(responseMessage(null, '1005', 'Not Enough Balance'));
-        }
-    
-        // Still playing
-        if (userGameWalletInfo.frozenBalance !== 0) {
-            mtRecord.balance = userGameWalletInfo.balance;
-            mtRecord.status.status = 'failed';
-            mtRecord.status.message = 'Previous Round Not Resolve';
-
-            await req.redis.setAsync(`${mtRedisPrefix}${mtcode}`, JSON.stringify(mtRecord), 'EX', mtRedisExpireTime);
-            await sqlAsync.query(req.db, 'ROLLBACK');
-            return res.json(responseMessage(null, '1100', 'Previous Round Not Resolve'));
         }
     
         // Preapre query
@@ -391,7 +427,7 @@ let betHandler = async function(req, res, next) {
         await sqlAsync.query(req.db, 'COMMIT');  // commit transaction only if all statement has executed without error
 
         // Log
-        req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] bet amount[${amount}] mtcode[${mtcode}]`);
+        req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] bet[${amount}] mtcode[${mtcode}]`);
 
         const resData = { balance: postBalance, currency: 'CNY' };
         return res.json(responseMessage(resData, '0', 'Success'));    
@@ -408,6 +444,10 @@ let rollOutHandler = async function(req, res, next) {
 
     // If the form data is invalid
     if (!result.isEmpty()) {
+        // Invalid format eventTime needs special msg (but for empty eventTime use regular message)
+        if (result.mapped().eventTime && req.body.eventTime) 
+            return res.json(responseMessage(null, '1004', result.mapped().eventTime.msg));
+
         // Return the first error to client
         let firstError = result.array()[0].msg;
         return res.json(responseMessage(null, '1003', firstError));
@@ -427,20 +467,6 @@ let rollOutHandler = async function(req, res, next) {
 
     // Covert data
     amount = Number(amount);
-
-    // Parse cookie session id
-    const sessionKey = parseSessCookie(session);
-    
-    // Check mtcode(record cannot be duplicated) and session(this user must login)
-    try {
-        const existMtcode = await req.redis.existsAsync(`${mtRedisPrefix}${mtcode}`);
-        const existSession = await req.redis.existsAsync(`sess:${sessionKey}`);
-        if (existMtcode === 1) return res.json(responseMessage(null, '2009', 'Duplicated Mtcode'));
-        if (existSession === 0) return res.json(responseMessage(null, '1003', 'Session Invalid'));
-    } catch (error) {
-        req.logger.error(`${error.message}`);
-        return res.json(responseMessage(null, '1100', 'Server Error'));
-    }
 
     // Prepare query
     let sqlString = `   SELECT
@@ -495,25 +521,15 @@ let rollOutHandler = async function(req, res, next) {
         };
     
         // Not enough balance
-        if (postBalance < 0) {
+        if (postBalance < 0 || userGameWalletInfo.balance <= 0) {
             mtRecord.balance = userGameWalletInfo.balance;
             mtRecord.status.status = 'failed';
             mtRecord.status.message = 'Not Enough Balance';
 
             await req.redis.setAsync(`${mtRedisPrefix}${mtcode}`, JSON.stringify(mtRecord), 'EX', mtRedisExpireTime);
             await sqlAsync.query(req.db, 'ROLLBACK');
+            req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] rollout[${amount}] but not enough balance mtcode[${mtcode}]`);
             return res.json(responseMessage(null, '1005', 'Not Enough Balance'));
-        }
-    
-        // Still playing
-        if (userGameWalletInfo.frozenBalance !== 0) {
-            mtRecord.balance = userGameWalletInfo.balance;
-            mtRecord.status.status = 'failed';
-            mtRecord.status.message = 'Previous Round Not Resolve';
-
-            await req.redis.setAsync(`${mtRedisPrefix}${mtcode}`, JSON.stringify(mtRecord), 'EX', mtRedisExpireTime);
-            await sqlAsync.query(req.db, 'ROLLBACK');
-            return res.json(responseMessage(null, '1100', 'Previous Round Not Resolve'));
         }
     
         // Preapre query
@@ -535,7 +551,7 @@ let rollOutHandler = async function(req, res, next) {
         await sqlAsync.query(req.db, 'COMMIT');  // commit transaction only if all statement has executed without error
 
         // Log
-        req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] rollout amount[${amount}] mtcode[${mtcode}]`);
+        req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] rollout[${amount}] mtcode[${mtcode}]`);
 
         const resData = { balance: postBalance, currency: 'CNY' };
         return res.json(responseMessage(resData, '0', 'Success'));   
@@ -548,13 +564,18 @@ let rollOutHandler = async function(req, res, next) {
 };
 
 
-// Validate amount, event time?
 // Resolve
 let rollInHandler = async function(req, res, next) {
     const result = validationResult(req);
     console.log(req.body);
     // If the form data is invalid
     if (!result.isEmpty()) {
+        // Invalid format eventTime needs special msg (but for empty eventTime use regular message)
+        if (result.mapped().eventTime && req.body.eventTime) 
+            return res.json(responseMessage(null, '1004', result.mapped().eventTime.msg));
+        if (result.mapped().createTime && req.body.createTime) 
+            return res.json(responseMessage(null, '1004', result.mapped().createTime.msg));
+        
         // Return the first error to client
         let firstError = result.array()[0].msg;
         return res.json(responseMessage(null, '1003', firstError));
@@ -583,15 +604,6 @@ let rollInHandler = async function(req, res, next) {
     amount = Number(amount);
     winpc = Number(winpc);
     rake = Number(rake);
-
-    // Check mtcode(record cannot be duplicated)
-    try {
-        const existMtcode = await req.redis.existsAsync(`${mtRedisPrefix}${mtcode}`);
-        if (existMtcode === 1) return res.json(responseMessage(null, '2009', 'Duplicated Mtcode'));
-    } catch (error) {
-        req.logger.error(`${error.message}`);
-        return res.json(responseMessage(null, '1100', 'Server Error'));
-    }
 
     // Prepare query
     let sqlString = `   SELECT 
@@ -705,13 +717,16 @@ let endRoundHandler = async function(req, res, next) {
     console.log(req.body);
     // If the form data is invalid
     if (!result.isEmpty()) {
+        // Invalid eventTime needs special msg
+        if (result.mapped().data && result.mapped().data.msg === 'EventTime Invalid') 
+            return res.json(responseMessage(null, '1004', result.mapped().data.msg));
+        if (result.mapped().createTime && req.body.createTime) 
+            return res.json(responseMessage(null, '1004', result.mapped().createTime.msg));
+        
         // Return the first error to client
         let firstError = result.array()[0].msg;
-        console.log({firstError});
         return res.json(responseMessage(null, '1003', firstError));
     }
-
-    
 
     // Gather all required data
     let {
@@ -729,18 +744,22 @@ let endRoundHandler = async function(req, res, next) {
     const mtcodes = data.map(curData => curData.mtcode);
 
     console.log({amount});
-    
+
+    // Special case: mt code number > 1, just check the first one
+    // Becauz if first exist, other must exist 
     // Check mtcode(record cannot be duplicated)
     try {
-        // Special case: mt code number > 1, just check the first one
-        // Becauz if first exist, other must exist 
         const existMtcode = await req.redis.existsAsync(`${mtRedisPrefix}${mtcodes[0]}`);
-        if (existMtcode === 1) return res.json(responseMessage(null, '2009', 'Duplicated Mtcode'));
+        if (existMtcode === 1) {
+            req.logger.verbose(`duplicate mtcode[${mtcodes[0]}]`);
+            return res.json(responseMessage(null, '2009', 'Duplicated Mtcode'));
+        }
     } catch (error) {
         req.logger.error(`${error.message}`);
         return res.json(responseMessage(null, '1100', 'Server Error'));
     }
-
+    
+    
     // Prepare query
     let sqlString = `   SELECT 
                             uid, gameId, agentId, storeId, balance, frozenBalance
@@ -909,7 +928,9 @@ let refundHandler = async function(req, res, next) {
     const postFrozenBalance = userGameWalletInfo.frozenBalance - amount;
 
     // Prepare mt record
-    mtRecord.status.status = 'refund'
+    mtRecord.status.status = 'refund';
+    mtRecord.before = userGameWalletInfo.balance;
+    mtRecord.balance = postBalance;
 
     // Preapre query
     let sqlStringUpdate = ` UPDATE UserGameWallet 
@@ -925,8 +946,8 @@ let refundHandler = async function(req, res, next) {
     values = [userGameWalletInfo.uid, 3, amount, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
     sqlStringTrans = mysql.format(sqlStringTrans, values);
 
-    // Execute transaction
-	// Bet
+  // Execute transaction
+	// Refund
 	try {
 		await sqlAsync.query(req.db, 'START TRANSACTION');
         await sqlAsync.query(req.db, sqlStringUpdate + sqlStringTrans);
@@ -954,6 +975,10 @@ let debitHandler = async function(req, res, next) {
 
     // If the form data is invalid
     if (!result.isEmpty()) {
+        // Invalid format eventTime needs special msg (but for empty eventTime use regular message)
+        if (result.mapped().eventTime && req.body.eventTime) 
+            return res.json(responseMessage(null, '1004', result.mapped().eventTime.msg));
+        
         // Return the first error to client
         let firstError = result.array()[0].msg;
         return res.json(responseMessage(null, '1003', firstError));
@@ -972,16 +997,6 @@ let debitHandler = async function(req, res, next) {
 
     // Covert data
     amount = Number(amount);
-
-    // Check mtcode(record cannot be duplicated)
-    try {
-        const existMtcode = await req.redis.existsAsync(`${mtRedisPrefix}${mtcode}`);
-        if (existMtcode === 1) return res.json(responseMessage(null, '2009', 'Duplicated Mtcode'));
-    } catch (error) {
-        req.logger.error(`${error.message}`);
-        return res.json(responseMessage(null, '1100', 'Server Error'));
-    }
-
     
     // Prepare query
     let sqlString = `   SELECT 
@@ -1032,18 +1047,47 @@ let debitHandler = async function(req, res, next) {
         ]
     };
 
-    // Only record mt
-    // We handle manually 
+    // Not enough balance
+    if (postBalance < 0) {
+        mtRecord.balance = userGameWalletInfo.balance;
+        mtRecord.status.status = 'failed';
+        mtRecord.status.message = 'Not Enough Balance';
+        
+        await req.redis.setAsync(`${mtRedisPrefix}${mtcode}`, JSON.stringify(mtRecord), 'EX', mtRedisExpireTime);
+        req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] debit[${amount}] but not enough balance mtcode[${mtcode}]`);
+        return res.json(responseMessage(null, '1005', 'Not Enough Balance'));
+    }
+
+    // Prepare query
+    let sqlStringUpdate1 = `    UPDATE UserGameWallet 
+                                SET 
+                                    balance=balance-?
+                                WHERE id=?;`;
+    values = [amount, account];
+    sqlStringUpdate1 = mysql.format(sqlStringUpdate1, values);
+
+    let sqlStringTrans1 = ` INSERT INTO GameTransaction
+                            (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                            VALUES (?, ?, ?, ?, ?, ?, ?);`;
+    values = [userGameWalletInfo.uid, 7, amount * -1, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+    sqlStringTrans1 = mysql.format(sqlStringTrans1, values);
+
+    // Execute transaction
+	// Debit
 	try {
+		await sqlAsync.query(req.db, 'START TRANSACTION');
+        await sqlAsync.query(req.db, sqlStringUpdate1 + sqlStringTrans1);
         await req.redis.setAsync(`${mtRedisPrefix}${mtcode}`, JSON.stringify(mtRecord), 'EX', mtRedisExpireTime);
 	}
 	catch (error) {
+		await sqlAsync.query(req.db, 'ROLLBACK'); // rollback transaction if a statement produce error
 		req.logger.error(`${error.message}`);
 		return res.json(responseMessage(null, '1100', 'Server Error'));
 	}
+	await sqlAsync.query(req.db, 'COMMIT');  // commit transaction only if all statement has executed without error
 
     // Log
-    req.logger.verbose(`user game wallet id[${account}] debit amount[${amount}] but do nothing`);
+    req.logger.verbose(`user game wallet id[${account}] debit amount[${amount}]  mtcode[${mtcode}]`);
 
     const resData = { balance: postBalance, currency: 'CNY' };
     return res.json(responseMessage(resData, '0', 'Success'));  
@@ -1056,6 +1100,10 @@ let creditHandler = async function(req, res, next) {
 
     // If the form data is invalid
     if (!result.isEmpty()) {
+        // Invalid format eventTime needs special msg (but for empty eventTime use regular message)
+        if (result.mapped().eventTime && req.body.eventTime) 
+            return res.json(responseMessage(null, '1004', result.mapped().eventTime.msg));
+        
         // Return the first error to client
         let firstError = result.array()[0].msg;
         return res.json(responseMessage(null, '1003', firstError));
@@ -1075,16 +1123,7 @@ let creditHandler = async function(req, res, next) {
     // Covert data
     amount = Number(amount);
 
-    // Check mtcode(record cannot be duplicated)
-    try {
-        const existMtcode = await req.redis.existsAsync(`${mtRedisPrefix}${mtcode}`);
-        if (existMtcode === 1) return res.json(responseMessage(null, '2009', 'Duplicated Mtcode'));
-    } catch (error) {
-        req.logger.error(`${error.message}`);
-        return res.json(responseMessage(null, '1100', 'Server Error'));
-    }
-
-    
+   
     // Prepare query
     let sqlString = `   SELECT 
                             uid, gameId, agentId, storeId, balance, frozenBalance
@@ -1134,18 +1173,36 @@ let creditHandler = async function(req, res, next) {
         ]
     };
 
-    // Only record mt
-    // We handle manually 
+    // Prepare query
+    let sqlStringUpdate1 = `    UPDATE UserGameWallet 
+                                SET 
+                                    balance=balance+?
+                                WHERE id=?;`;
+    values = [amount, account];
+    sqlStringUpdate1 = mysql.format(sqlStringUpdate1, values);
+
+    let sqlStringTrans1 = ` INSERT INTO GameTransaction
+                            (uid, transTypeCode, amount, relateUid, gameId, agentId, storeId)
+                            VALUES (?, ?, ?, ?, ?, ?, ?);`;
+    values = [userGameWalletInfo.uid, 7, amount, userGameWalletInfo.uid, userGameWalletInfo.gameId, userGameWalletInfo.agentId, userGameWalletInfo.storeId];
+    sqlStringTrans1 = mysql.format(sqlStringTrans1, values);
+
+    // Execute transaction
+	// Credit
 	try {
+		await sqlAsync.query(req.db, 'START TRANSACTION');
+        await sqlAsync.query(req.db, sqlStringUpdate1 + sqlStringTrans1);
         await req.redis.setAsync(`${mtRedisPrefix}${mtcode}`, JSON.stringify(mtRecord), 'EX', mtRedisExpireTime);
 	}
 	catch (error) {
+		await sqlAsync.query(req.db, 'ROLLBACK'); // rollback transaction if a statement produce error
 		req.logger.error(`${error.message}`);
 		return res.json(responseMessage(null, '1100', 'Server Error'));
 	}
+	await sqlAsync.query(req.db, 'COMMIT');  // commit transaction only if all statement has executed without error
 
     // Log
-    req.logger.verbose(`user game wallet id[${account}] credit amount[${amount}] but do nothing`);
+    req.logger.verbose(`user game wallet id[${account}] credit amount[${amount}]  mtcode[${mtcode}]`);
 
     const resData = { balance: postBalance, currency: 'CNY' };
     return res.json(responseMessage(resData, '0', 'Success'));  
@@ -1156,6 +1213,10 @@ let payOffHandler = async function(req, res, next) {
 
     // If the form data is invalid
     if (!result.isEmpty()) {
+        // Invalid format eventTime needs special msg (but for empty eventTime use regular message)
+        if (result.mapped().eventTime && req.body.eventTime) 
+            return res.json(responseMessage(null, '1004', result.mapped().eventTime.msg));
+        
         // Return the first error to client
         let firstError = result.array()[0].msg;
         return res.json(responseMessage(null, '1003', firstError));
@@ -1171,16 +1232,6 @@ let payOffHandler = async function(req, res, next) {
 
     // Covert data
     amount = Number(amount);
-
-    
-    // Check mtcode(record cannot be duplicated)
-    try {
-        const existMtcode = await req.redis.existsAsync(`${mtRedisPrefix}${mtcode}`);
-        if (existMtcode === 1) return res.json(responseMessage(null, '2009', 'Duplicated Mtcode'));
-    } catch (error) {
-        req.logger.error(`${error.message}`);
-        return res.json(responseMessage(null, '1100', 'Server Error'));
-    }
 
     // Prepare query
     let sqlString = `   SELECT 
@@ -1233,7 +1284,7 @@ let payOffHandler = async function(req, res, next) {
 
     // Prepare query, roll in money to user
     let sqlStringUpdate1 = `    UPDATE UserGameWallet 
-                                SET balance=balance+?,
+                                SET balance=balance+?
                                 WHERE id=?;`;
     values = [amount, account];
     sqlStringUpdate1 = mysql.format(sqlStringUpdate1, values);
@@ -1268,6 +1319,30 @@ let payOffHandler = async function(req, res, next) {
 
 // Form data validate generators
 // Invoke it to produce a middleware for validating
+function checkPlayerValidator(){
+    return [
+        param('userGameWalletId')
+            .isLength({ min:1 }).withMessage('Account Is Required')
+            .isLength({ max:36 }).withMessage('Account Exceed Max Len 36'),
+    ];
+}
+
+function balanceValidator(){
+    return [
+        param('userGameWalletId')
+            .isLength({ min:1 }).withMessage('Account Is Required')
+            .isLength({ max:36 }).withMessage('Account Exceed Max Len 36'),
+    ];
+}
+
+function recordValidator(){
+    return [
+        param('mtcode')
+            .isLength({ min:1 }).withMessage('MtCode Is Required')
+            .isLength({ max:70 }).withMessage('MtCode Exceed Max Len 70'),
+    ];
+}
+
 function takeAllValidator(){
     return [
         // Check format
@@ -1280,8 +1355,11 @@ function takeAllValidator(){
             .isLength({ min:1 }).withMessage('Account Is Required')
             .isLength({ max:36 }).withMessage('Account Exceed Max Len 36'),
         body('eventTime')
-            .isLength({ min:1 }).withMessage('EventTime Is Required')
-            .isLength({ max:35 }).withMessage('EventTime Exceed Max Len 35'),
+            .custom(async function(data, {req}){
+                // RFC3339
+                if (!regexRFC3339.test(data)) throw Error('EventTime Invalid');
+                return true;
+            }),
         body('gamehall')
             .isLength({ min:1 }).withMessage('GameHall Is Required')
             .isLength({ max:36 }).withMessage('GameHall Exceed Max Len 36'),
@@ -1314,8 +1392,11 @@ function rollInValidator(){
             .isLength({ min:1 }).withMessage('Account Is Required')
             .isLength({ max:36 }).withMessage('Account Exceed Max Len 36'),
         body('eventTime')
-            .isLength({ min:1 }).withMessage('EventTime Is Required')
-            .isLength({ max:35 }).withMessage('EventTime Exceed Max Len 35'),
+            .custom(async function(data, {req}){
+                // RFC3339
+                if (!regexRFC3339.test(data)) throw Error('EventTime Invalid');
+                return true;
+            }),
         body('gamehall')
             .isLength({ min:1 }).withMessage('GameHall Is Required')
             .isLength({ max:36 }).withMessage('GameHall Exceed Max Len 36'),
@@ -1325,11 +1406,25 @@ function rollInValidator(){
         body('roundid')
             .isLength({ min:1 }).withMessage('RoundId Is Required')
             .isLength({ max:50 }).withMessage('RoundId Exceed Max Len 50'),
+        body('bet')
+            .isFloat({ min: 0 }).withMessage('Bet Invalid'),
+        body('win')
+            .isFloat().withMessage('Win Invalid'),
         body('amount')
             .isFloat({ min: 0 }).withMessage('Amount Invalid'),
         body('mtcode')
             .isLength({ min:1 }).withMessage('MtCode Is Required')
             .isLength({ max:70 }).withMessage('MtCode Exceed Max Len 70'),
+        body('createTime')
+            .custom(async function(data, {req}){
+                // RFC3339
+                if (!regexRFC3339.test(data)) throw Error('CreateTime Invalid');
+                return true;
+            }),
+        body('winpc')
+            .isFloat().withMessage('Winpc Invalid'),
+        body('rake')
+            .isFloat().withMessage('Rake Invalid'),
         body('gametype')
             .isLength({ min:1 }).withMessage('GameType Is Required')
             .isLength({ max:36 }).withMessage('GameType Exceed Max Len 36'),
@@ -1353,8 +1448,11 @@ function betValidator(){
             .isLength({ min:1 }).withMessage('Account Is Required')
             .isLength({ max:36 }).withMessage('Account Exceed Max Len 36'),
         body('eventTime')
-            .isLength({ min:1 }).withMessage('EventTime Is Required')
-            .isLength({ max:35 }).withMessage('EventTime Exceed Max Len 35'),
+            .custom(async function(data, {req}){
+                // RFC3339
+                if (!regexRFC3339.test(data)) throw Error('EventTime Invalid');
+                return true;
+            }),
         body('gamehall')
             .isLength({ min:1 }).withMessage('GameHall Is Required')
             .isLength({ max:36 }).withMessage('GameHall Exceed Max Len 36'),
@@ -1365,7 +1463,7 @@ function betValidator(){
             .isLength({ min:1 }).withMessage('RoundId Is Required')
             .isLength({ max:50 }).withMessage('RoundId Exceed Max Len 50'),
         body('amount')
-            .isFloat({ min: 0 }).withMessage('Amount Invalid'),
+            .isFloat({ gt: 0 }).withMessage('Amount Invalid'), // gt for > 
         body('mtcode')
             .isLength({ min:1 }).withMessage('MtCode Is Required')
             .isLength({ max:70 }).withMessage('MtCode Exceed Max Len 70'),
@@ -1389,8 +1487,11 @@ function rollOutValidator(){
             .isLength({ min:1 }).withMessage('Account Is Required')
             .isLength({ max:36 }).withMessage('Account Exceed Max Len 36'),
         body('eventTime')
-            .isLength({ min:1 }).withMessage('EventTime Is Required')
-            .isLength({ max:35 }).withMessage('EventTime Exceed Max Len 35'),
+            .custom(async function(data, {req}){
+                // RFC3339
+                if (!regexRFC3339.test(data)) throw Error('EventTime Invalid');
+                return true;
+            }),
         body('gamehall')
             .isLength({ min:1 }).withMessage('GameHall Is Required')
             .isLength({ max:36 }).withMessage('GameHall Exceed Max Len 36'),
@@ -1401,7 +1502,7 @@ function rollOutValidator(){
             .isLength({ min:1 }).withMessage('RoundId Is Required')
             .isLength({ max:50 }).withMessage('RoundId Exceed Max Len 50'),
         body('amount')
-            .isFloat({ min: 0 }).withMessage('Amount Invalid'),
+            .isFloat({ gt: 0 }).withMessage('Amount Invalid'), // gt for >
         body('mtcode')
             .isLength({ min:1 }).withMessage('MtCode Is Required')
             .isLength({ max:70 }).withMessage('MtCode Exceed Max Len 70'),
@@ -1436,6 +1537,12 @@ function endRoundValidator(){
         body('data')
             .isLength({ min:1 }).withMessage('Data Is Required')
             .isLength({ max:999999 }).withMessage('Data Exceed Max Len 999999'),
+        body('createTime')
+            .custom(async function(data, {req}){
+                // RFC3339
+                if (!regexRFC3339.test(data)) throw Error('CreateTime Invalid');
+                return true;
+            }),
 
         // Special case: data constains an array of JSON string, if we escape "" then GG
         // Sanitize 
@@ -1446,11 +1553,15 @@ function endRoundValidator(){
         body('data').custom(async function(data, {req}){
             const dataArray = JSON.parse(data);
             dataArray.forEach(element => {
+                if (element.amount === undefined) throw Error('Amount Is Required');
                 if (element.amount < 0) throw Error('Amount Invalid');
-                if (element.mtcode.length <= 0) throw Error('MtCode Is Required'); 
+                
+                if (element.mtcode === undefined || element.mtcode.length <= 0) throw Error('MtCode Is Required'); 
                 if (element.mtcode.length > 70) throw Error('MtCode Exceed Max Len 70'); 
-                if (element.eventtime.length <= 0) throw Error('EventTime Is Required'); 
-                if (element.eventtime.length > 35) throw Error('EventTime Exceed Max Len 35'); 
+
+                if (element.eventtime === undefined) throw Error('EventTime Is Required'); 
+                // RFC3339
+                if (!regexRFC3339.test(element.eventtime)) throw Error('EventTime Invalid');
                 // FK you CQ9, eventtime vs. eventTime ?
             });
             return true;
@@ -1489,10 +1600,13 @@ function payOffValidator(){
             .isLength({ min:1 }).withMessage('Account Is Required')
             .isLength({ max:36 }).withMessage('Account Exceed Max Len 36'),
         body('eventTime')
-            .isLength({ min:1 }).withMessage('EventTime Is Required')
-            .isLength({ max:35 }).withMessage('EventTime Exceed Max Len 35'),
+            .custom(async function(data, {req}){
+                // RFC3339
+                if (!regexRFC3339.test(data)) throw Error('EventTime Invalid');
+                return true;
+            }),
         body('amount')
-            .isFloat({ min: 0 }).withMessage('Amount Invalid'),
+            .isFloat({ gt: 0 }).withMessage('Amount Invalid'), // gt for >
         body('mtcode')
             .isLength({ min:1 }).withMessage('MtCode Is Required')
             .isLength({ max:70 }).withMessage('MtCode Exceed Max Len 70'),
@@ -1516,8 +1630,11 @@ function debitValidator(){
             .isLength({ min:1 }).withMessage('Account Is Required')
             .isLength({ max:36 }).withMessage('Account Exceed Max Len 36'),
         body('eventTime')
-            .isLength({ min:1 }).withMessage('EventTime Is Required')
-            .isLength({ max:35 }).withMessage('EventTime Exceed Max Len 35'),
+            .custom(async function(data, {req}){
+                // RFC3339
+                if (!regexRFC3339.test(data)) throw Error('EventTime Invalid');
+                return true;
+            }),
         body('gamehall')
             .isLength({ min:1 }).withMessage('GameHall Is Required')
             .isLength({ max:36 }).withMessage('GameHall Exceed Max Len 36'),
@@ -1528,7 +1645,7 @@ function debitValidator(){
             .isLength({ min:1 }).withMessage('RoundId Is Required')
             .isLength({ max:50 }).withMessage('RoundId Exceed Max Len 50'),
         body('amount')
-            .isFloat({ min: 0 }).withMessage('Amount Invalid'),
+            .isFloat({ gt: 0 }).withMessage('Amount Invalid'), // gt for >
         body('mtcode')
             .isLength({ min:1 }).withMessage('MtCode Is Required')
             .isLength({ max:70 }).withMessage('MtCode Exceed Max Len 70'),
@@ -1552,8 +1669,11 @@ function creditValidator(){
             .isLength({ min:1 }).withMessage('Account Is Required')
             .isLength({ max:36 }).withMessage('Account Exceed Max Len 36'),
         body('eventTime')
-            .isLength({ min:1 }).withMessage('EventTime Is Required')
-            .isLength({ max:35 }).withMessage('EventTime Exceed Max Len 35'),
+            .custom(async function(data, {req}){
+                // RFC3339
+                if (!regexRFC3339.test(data)) throw Error('EventTime Invalid');
+                return true;
+            }),
         body('gamehall')
             .isLength({ min:1 }).withMessage('GameHall Is Required')
             .isLength({ max:36 }).withMessage('GameHall Exceed Max Len 36'),
@@ -1564,7 +1684,7 @@ function creditValidator(){
             .isLength({ min:1 }).withMessage('RoundId Is Required')
             .isLength({ max:50 }).withMessage('RoundId Exceed Max Len 50'),
         body('amount')
-            .isFloat({ min: 0 }).withMessage('Amount Invalid'),
+            .isFloat({ gt: 0 }).withMessage('Amount Invalid'), // gt for >
         body('mtcode')
             .isLength({ min:1 }).withMessage('MtCode Is Required')
             .isLength({ max:70 }).withMessage('MtCode Exceed Max Len 70'),
@@ -1578,9 +1698,16 @@ function creditValidator(){
 
 module.exports = {
     isAuthorized: isAuthorizedHandler,
+    isValidMtcode: isValidMtcodeHandler,
+    isValidSession: isValidSessionHandler,
+    invalidRoute: invalidRouteHandler,
+
     checkPlayer: checkPlayerHandler,
+    checkPlayerValidate: checkPlayerValidator(),
     balance: balanceHandler,
+    balanceValidate: balanceValidator(),
     record: recordHandler,
+    recordValidate: recordValidator(),
     
     takeAll: takeAllHandler,
     takeAllValidate: takeAllValidator(),
