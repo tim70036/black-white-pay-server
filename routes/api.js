@@ -74,5 +74,6 @@ router.get('/game/wallet/list', game.wallet.list);
 router.post('/game/wallet/take-in', game.wallet.takeInValidate, game.wallet.takeIn);
 router.post('/game/wallet/take-out', game.wallet.takeOutValidate, game.wallet.takeOut);
 router.post('/game/wallet/take-out-all', game.wallet.takeOutAll);
+router.post('/game/game-list/get', game.gameList.gameListValidate, game.gameList.gameList);
 
 module.exports = router;
