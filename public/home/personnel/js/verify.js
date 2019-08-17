@@ -148,7 +148,7 @@ var Verify = function () {
 					}else{
 						swal({
                             title: '執行失敗',
-                            text: result.msg,
+                            text: response.msg,
                             type: 'error',
                             confirmButtonText: 'OK'
                         });
@@ -207,7 +207,7 @@ var Verify = function () {
 					}else{
 						swal({
                             title: '執行失敗',
-                            text: result.msg,
+                            text: response.msg,
                             type: 'error',
                             confirmButtonText: 'OK'
                         });

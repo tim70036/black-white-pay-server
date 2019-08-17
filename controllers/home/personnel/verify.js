@@ -146,7 +146,7 @@ let denyHandler = async function(req, res) {
     
 };
 
-function verifyValidator() {
+function verifyAcceptValidator() {
     return [
 
         // For each in data array
@@ -165,18 +165,71 @@ function verifyValidator() {
             // Check if BindRequest id is valid
             let sqlString, values, sql, result;
             if(req.user.role === 'store'){
-                sqlString = `SELECT Br.id FROM BindRequest AS Br
+                sqlString = `SELECT Br.id, Br.agentId, Br.uid FROM BindRequest AS Br
                             INNER JOIN AgentInfo AS Ag
                                 ON Br.agentId=Ag.id
                             INNER JOIN StoreInfo AS Store
                                 ON Store.id=Ag.storeId
                             WHERE Store.id=? AND Br.id=?
-                            ;`
+                            ;`;
                 values = [req.user.roleId, data];
                 sql = mysql.format(sqlString, values);
                 result = await sqlAsync.query(req.db, sql);
                 if(result.length == 0) {
-                    return false;
+                    throw Error('審核資料錯誤');
+                }
+
+                sqlString = `SELECT Mem.id FROM MemberInfo AS Mem
+                            INNER JOIN UserAccount AS U
+                              ON U.id=Mem.uid
+                            WHERE Mem.uid=? AND Mem.agentId=?
+                            ;`;
+                values = [result[0].uid, result[0].agentId];
+                sql = mysql.format(sqlString, values);
+                result = await sqlAsync.query(req.db, sql);
+                if(result.length > 0) {
+                    throw Error('會員已綁定');
+                }
+            } else {
+                return false;
+            }
+
+            return true;
+        }),
+    ];
+}
+
+function verifyDenyValidator() {
+    return [
+
+        // For each in data array
+        body('id')
+            .isInt({ min:0, max:9999999999 }).withMessage('Wrong data format'),
+        // Sanitize all values 
+        sanitizeBody('id')
+            .escape() // Esacpe characters to prevent XSS attack, replace <, >, &, ', " and / with HTML entities
+            .trim(), // trim white space from both end 
+
+
+        // Check permission from database
+        body('id').custom(async function(data, {req}){
+
+            // Prepare query
+            // Check if BindRequest id is valid
+            let sqlString, values, sql, result;
+            if(req.user.role === 'store'){
+                sqlString = `SELECT Br.id, Br.agentId, Br.uid FROM BindRequest AS Br
+                            INNER JOIN AgentInfo AS Ag
+                                ON Br.agentId=Ag.id
+                            INNER JOIN StoreInfo AS Store
+                                ON Store.id=Ag.storeId
+                            WHERE Store.id=? AND Br.id=?
+                            ;`;
+                values = [req.user.roleId, data];
+                sql = mysql.format(sqlString, values);
+                result = await sqlAsync.query(req.db, sql);
+                if(result.length == 0) {
+                    throw Error('審核資料錯誤');
                 }
             } else {
                 return false;
@@ -245,5 +298,6 @@ module.exports = {
     read: readHandler,
     accept: acceptHandler,
     deny: denyHandler,
-    verifyValidate: verifyValidator(),
+    verifyAcceptValidate: verifyAcceptValidator(),
+    verifyDenyValidate: verifyDenyValidator(),
 };

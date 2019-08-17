@@ -93,8 +93,8 @@ router.post('/personnel/member/delete', member.deleteValidate, member.delete);
 router.post('/personnel/member/search', member.searchValidate, member.search);
 router.post('/personnel/user/search', user.searchValidate, user.search);
 
-router.post('/personnel/verify/accept', verify.verifyValidate, verify.accept);
-router.post('/personnel/verify/deny', verify.verifyValidate, verify.deny);
+router.post('/personnel/verify/accept', verify.verifyAcceptValidate, verify.accept);
+router.post('/personnel/verify/deny', verify.verifyDenyValidate, verify.deny);
 
 // Credit management routes
 const { transfer, history, autoTransfer } = storeCurrency;
