@@ -9,7 +9,8 @@ const
     infoHandlers = require('./info'),
     accountHandlers = require('./account'),
     detailHandlers = require('./detail'),
-    authHandlers = require('./auth');
+    authHandlers = require('./auth'),
+    gameHandlers = require('./game');
 
 // Handler for login page
 let loginHandler = function (req, res) {
@@ -35,6 +36,7 @@ module.exports = {
     info: infoHandlers,
     account: accountHandlers,
     detail: detailHandlers,
+    game: gameHandlers,
 };
 
 // ----------------------------------------------------- //

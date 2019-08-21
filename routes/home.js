@@ -7,14 +7,13 @@ const
 let router = express.Router();
 
 // Extract handlers
-const { dashboard, personnel, storeCurrency, mainCurrency, report, info, account, detail, login, auth } = require('../controllers/home');
-
+const { dashboard, personnel, storeCurrency, mainCurrency, report, info, account, detail, login, auth, game } = require('../controllers/home');
 
 // Check login
-router.use(/^\/(dashboard|personnel|storeCurrency|mainCurrency|report|info|account|detail).*/, auth.isLogin); // used on all pages, except login
+router.use(/^\/(dashboard|personnel|storeCurrency|mainCurrency|report|info|account|detail|game).*/, auth.isLogin); // used on all pages, except login
 
 // User connection info
-router.use(/^\/(dashboard|personnel|storeCurrency|mainCurrency|report|info|account|detail).*/, auth.connectionInfo); // used on all pages, except login
+router.use(/^\/(dashboard|personnel|storeCurrency|mainCurrency|report|info|account|detail|game).*/, auth.connectionInfo); // used on all pages, except login
 
 // Authorize personnel
 // Special case : delete
@@ -52,6 +51,9 @@ router.use(/^\/info\/ad\/.*/, auth.allowRole('store'));
 
 //Authorize account
 router.use(/^\/account\/retrieve\/.*/, auth.allowRole('admin', 'store'));
+
+//Authorize game
+router.use(/^\/game\/gameList\/.*/, auth.allowRole('store'));
 
 // Auth routes
 router.post('/auth/login', auth.loginValidate, auth.login);
@@ -199,4 +201,13 @@ router.post('/account/misc/edit', misc.editValidate,
         maxCount: 1
     }]), misc.edit);
 
+// game management routes
+const { gameList, management } = game;
+router.get('/game/gameList/', gameList.render);
+router.get('/game/gameList/read', gameList.read);
+
+router.get('/game/management/', management.render);
+router.post('/game/management/search', management.searchValidate, management.search);
+router.post('/game/management/add', management.addValidate, management.add);
+router.post('/game/management/delete', management.deleteValidate, management.delete);
 module.exports = router;

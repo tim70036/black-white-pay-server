@@ -2,6 +2,7 @@ const
     { body, validationResult } = require('express-validator/check'),
     { sanitizeBody } = require('express-validator/filter'),
     mysql = require('mysql'),
+    fetch = require('node-fetch'),
     sqlAsync = require('../../../libs/sqlAsync');
 
 // Must block: if the number before exchange and after exchage <= 0 in take-in
@@ -38,7 +39,7 @@ let listHandler = async function(req, res, next) {
     return res.json({ errCode : 0, msg: 'success', data: gameWallettList });
 }
 
-let takeInHandler = async function(req, res, next) {
+let takeInAndPlayHandler = async function(req, res, next) {
     const result = validationResult(req);
 
 	// If the form data is invalid
@@ -210,7 +211,69 @@ let takeInHandler = async function(req, res, next) {
     if (hasTakeOut) req.logger.verbose(`account[${req.user.account}] role[${req.user.role}] take-out game wallet gameId[${gameId}] storeCurrency[${userGameWalletInfo.storeId}] balance[${userGameWalletInfo.balance}]`);
     req.logger.verbose(`account[${req.user.account}] role[${req.user.role}] take-in storeCurrency[${storeId}] amount[${amount}] into gameId[${gameId}] amount[${gameWalletAmount}]`);
 
-    return res.json({ errCode: 0, msg: 'success' });
+    // select target gameWallet, get GameLink
+    sqlString = `   SELECT UGW.id, G.name, G.code, G.provider
+                    FROM UserGameWallet AS UGW
+                    INNER JOIN GameInfo AS G
+                        ON UGW.gameId = G.id
+                    WHERE uid=? AND gameId=?;
+                `;
+    values = [req.user.id, gameId];
+    sqlString = mysql.format(sqlString, values);
+
+    try {
+        results = await sqlAsync.query(req.db, sqlString);
+    }
+    catch (error) {
+        req.logger.error(`${error.message}`);
+        return res.json({ errCode : 2, msg: 'Server 錯誤' });
+    }
+
+    // prepare requestBody
+    let gameLinkRequestBody = {
+        account: results[0].id.toString(),
+        gamehall: results[0].provider,
+        gamecode: results[0].code,
+        gameplat: 'mobile',
+        lang: 'zh-cn',
+        session: req.cookies['connect.sid'],
+    };
+    // encode requestBody to UrlEncoded form
+    const toUrlEncoded = obj => Object.keys(obj).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(obj[k])).join('&');
+    const formData = toUrlEncoded(gameLinkRequestBody);
+    let cq9Url = 'http://api.cqgame.games';
+    let path = '/gameboy/player/sw/gamelink';
+
+    let fetchPayload = {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': process.env.API_TOKEN_CQ9,
+        },
+        body: formData,
+    }
+
+    let response;
+    try {
+        response = await fetch(`${cq9Url}${path}`, fetchPayload);
+
+        // Parse to JSON
+        response = await response.json();
+        console.log({response});
+        if (!response) throw Error('cq9 getGameLink no response');
+    } catch (error) {
+        req.logger.error(`${error.message}`);
+        return res.json({ errCode : 2, msg: 'Server 錯誤' });
+    }
+
+    // Process response
+    if (response.status.code === '0') {
+        return res.json({ errCode: 0, msg: 'success', data: response.data.url });
+    } else {
+        return res.json({ errCode : 2, msg: 'Server 錯誤' });
+    }
+    // return res.json({ errCode: 0, msg: 'success', data: gameWalletId });
 }
 
 let takeOutHandler = async function(req, res, next) {
@@ -511,7 +574,7 @@ function takeOutValidator(){
 module.exports = {
     list: listHandler,
 
-    takeIn: takeInHandler,
+    takeInAndPlayHandler: takeInAndPlayHandler,
     takeInValidate: takeInValidator(),
 
     takeOut: takeOutHandler,

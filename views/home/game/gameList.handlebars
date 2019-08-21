@@ -1,0 +1,52 @@
+{{!-- Import custom stylesheet to layout --}}
+{{#section 'css'}}
+    <link href="/home/assets/vendors/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
+	<link href="/home/style.css" rel="stylesheet" type="text/css" />
+	
+{{/section}}
+{{!-- Import custom script to layout --}}
+{{#section 'js'}}
+	<script src="/home/game/js/gameList.js" type="text/javascript"></script>
+	<script src="/home/assets/vendors/custom/datatables/datatables.bundle.js" type="text/javascript"></script>
+{{/section}}
+
+{{!-- Header goes here --}}
+<!-- BEGIN: Subheader -->
+<div class="m-subheader ">
+	<div class="d-flex align-items-center">
+		<div class="mr-auto">
+			<h3 class="m-subheader__title "></h3>
+		</div>
+	</div>
+</div>
+<!-- END: Subheader -->
+
+{{!-- Content goes here --}}
+<div class="m-content">
+	
+	<div class="m-portlet m-portlet--mobile">
+        　  
+		<div class="m-portlet__head">
+			<div class="m-portlet__head-caption">
+				<div class="m-portlet__head-title">
+					<h2 class="m-portlet__head-text">
+						遊戲列表
+					</h2>
+				</div>
+			</div>
+		</div>
+		
+		<div class="m-portlet__body">
+			<table class="table table-bordered table-hover nowrap " id="data-table">
+				<thead>
+					<tr>
+						<th class="dt-center">遊戲名稱</th>		{{!-- 0 --}}
+						<th class="dt-center">圖片</th>			{{!-- 1 --}}
+						<th class="dt-center">時間</th>			{{!-- 2 --}}
+					</tr>
+				</thead>
+			</table>
+		</div>
+	</div>
+</div>
+

@@ -71,9 +71,9 @@ router.post('/friend/request/cancel', friend.request.cancelValidate, friend.requ
 
 // Game routes
 router.get('/game/wallet/list', game.wallet.list);
-router.post('/game/wallet/take-in', game.wallet.takeInValidate, game.wallet.takeIn);
+router.post('/game/wallet/take-in-and-play', game.wallet.takeInValidate, game.wallet.takeInAndPlayHandler);
 router.post('/game/wallet/take-out', game.wallet.takeOutValidate, game.wallet.takeOut);
 router.post('/game/wallet/take-out-all', game.wallet.takeOutAll);
-router.post('/game/game-list/get', game.gameList.gameListValidate, game.gameList.gameList);
+router.post('/game/game-list/list', game.gameList.gameListValidate, game.gameList.gameList);
 
 module.exports = router;

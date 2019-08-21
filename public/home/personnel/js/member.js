@@ -903,8 +903,6 @@ var Member = function () {
                     return markup;
                 },
             });
-
-
         });
 
         $('#storeAccount').select2({

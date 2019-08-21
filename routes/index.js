@@ -41,7 +41,7 @@ function init(app) {
  
         if (req.xhr) {
             return res.json({
-                errCode: 1, // API format
+                errCode: 3, // API format
                 err: true, // Web old format
                 msg: err.userMessage
             });
