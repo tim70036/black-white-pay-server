@@ -7,7 +7,8 @@ const
 let listHandler = async function(req, res, next) {
 
     let sqlString = `
-                      SELECT Store.id AS storeId, U.name AS name, Store.imageSrc AS thumbnail
+                      SELECT Store.id AS storeId, U.name AS name, Store.imageSrc AS thumbnail,
+                            Store.address, Store.phoneNumber AS phone, Store.businesshours
                       FROM StoreInfo AS Store
                       INNER JOIN UserAccount AS U
                           ON U.id=Store.uid
