@@ -115,12 +115,13 @@
 						<th class="dt-center">信用額度</th>		{{!-- 6 --}}
 						<th class="dt-center">旗下庫存點數</th>	{{!-- 7 --}}
 						<th class="dt-center">旗下可用點數</th>	{{!-- 8 --}}
-						<th class="dt-center">狀態</th>			{{!-- 9 --}}
-						<th class="dt-center">備註</th>			{{!-- 10 --}}
-                        <th class="dt-center">信箱</th>			{{!-- 11 --}}
-                        <th class="dt-center">電話</th>			{{!-- 12 --}}
-						<th class="dt-center">最後更新時間</th>	{{!-- 13 --}}
-						<th class="dt-center">創立時間</th>		{{!-- 14 --}}
+                        <th class="dt-center">遊戲返水</th>		{{!-- 9 --}}
+						<th class="dt-center">狀態</th>			{{!-- 10 --}}
+						<th class="dt-center">備註</th>			{{!-- 11 --}}
+                        <th class="dt-center">信箱</th>			{{!-- 12 --}}
+                        <th class="dt-center">電話</th>			{{!-- 13 --}}
+						<th class="dt-center">最後更新時間</th>	{{!-- 14 --}}
+						<th class="dt-center">創立時間</th>		{{!-- 15 --}}
 					</tr>
 				</thead>
 			</table>
@@ -260,6 +261,16 @@
 						<div class="m-form__section m-form__section--last">
 							<div class="m-form__heading">
 								<h3 class="m-form__heading-title">其它資訊:</h3>
+							</div>
+                            <div class="form-group m-form__group row">
+								<label class="col-lg-2 col-form-label">遊戲返水(%) </label>
+								<div class="col-lg-10 m-form__group-sub">
+									<div class="m-input-icon m-input-icon--left">
+										<input id="rtp" name="rtp" type="text" class="form-control m-input" placeholder="請輸入0~100" value="0">
+										<span class="m-input-icon__icon m-input-icon__icon--right"><span><i class="fa fa-percent"></i></span></span>
+									</div>
+									<span class="m-form__help"> </span>
+								</div>
 							</div>
                             <div class="form-group m-form__group row">
 								<label class="col-lg-2 col-form-label">信箱 </label>

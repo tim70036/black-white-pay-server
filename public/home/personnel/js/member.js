@@ -455,6 +455,7 @@ var Member = function () {
             // Collect selected data
             // Iterate each row in table
             var data = [];
+            var nRow = $(this).parents('tr')[0];
             oTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
 
                 // Check whether this row has been check
@@ -513,8 +514,8 @@ var Member = function () {
                             // Sweet alert
                             if (!result.err) {
 
-                                oTable.ajax.reload();
-
+                                //oTable.ajax.reload();
+                                oTable.row(nRow).remove().draw();
                                 swal({
                                     title: '執行成功',
                                     text: '會員已刪除!',

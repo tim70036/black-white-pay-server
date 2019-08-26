@@ -13,12 +13,13 @@ var Agent = function () {
         credit: 7,
         totalCash: 8,
         totalAvail: 9,
-        status: 10,
-        comment: 11,
-        email: 12,
-        phoneNumber: 13,
-        updatetime: 14,
-        createtime: 15,
+        rtp: 10,
+        status: 11,
+        comment: 12,
+        email: 13,
+        phoneNumber: 14,
+        updatetime: 15,
+        createtime: 16,
     };
 
     // Data table init function
@@ -89,6 +90,9 @@ var Agent = function () {
                 },
                 {
                     data: 'totalAvail'
+                },
+                {
+                    data: 'rtp'
                 },
                 {
                     data: 'status'
@@ -179,30 +183,36 @@ var Agent = function () {
                     className: 'dt-right'
                 },
                 {
-                    targets: colMappings.status,
+                    targets: colMappings.rtp,
                     responsivePriority: 10,
+                    render: numberRender,
+                    className: 'dt-right'
+                },
+                {
+                    targets: colMappings.status,
+                    responsivePriority: 11,
                     render: statusRender,
                     className: 'dt-center'
                 },
                 {
                     targets: colMappings.comment,
-                    responsivePriority: 11,
-                },
-                {
-                    targets: colMappings.email,
                     responsivePriority: 12,
                 },
                 {
-                    targets: colMappings.phoneNumber,
+                    targets: colMappings.email,
                     responsivePriority: 13,
                 },
                 {
-                    targets: colMappings.updatetime,
+                    targets: colMappings.phoneNumber,
                     responsivePriority: 14,
                 },
                 {
-                    targets: colMappings.createtime,
+                    targets: colMappings.updatetime,
                     responsivePriority: 15,
+                },
+                {
+                    targets: colMappings.createtime,
+                    responsivePriority: 16,
                 },
             ],
         });
@@ -248,6 +258,7 @@ var Agent = function () {
                     var phoneNumber = oTable.cell(rowIdx, colMappings.phoneNumber).data();
                     var email = oTable.cell(rowIdx, colMappings.email).data();
                     var comment = oTable.cell(rowIdx, colMappings.comment).data();
+                    var rtp = oTable.cell(rowIdx, colMappings.rtp).data();
 
                     //console.log('index is cheched : ' + rowIdx);
                     oTable.cell(rowIdx, colMappings.name).node().innerHTML = `<input type="text" class="form-control input-small" value=${name}>`;
@@ -255,6 +266,7 @@ var Agent = function () {
                     oTable.cell(rowIdx, colMappings.phoneNumber).node().innerHTML = `<input type="text" class="form-control input-small" value=${phoneNumber}>`;
                     oTable.cell(rowIdx, colMappings.email).node().innerHTML = `<input type="text" class="form-control input-small" value=${email}>`;
                     oTable.cell(rowIdx, colMappings.comment).node().innerHTML = `<input type="text" class="form-control input-small" value=${comment}>`;
+                    oTable.cell(rowIdx, colMappings.rtp).node().innerHTML = `<input type="text" class="form-control input-small" value=${rtp}>`;
                 }
             });
 
@@ -285,6 +297,7 @@ var Agent = function () {
                     var phoneNumber = oTable.cell(rowIdx, colMappings.phoneNumber).data();
                     var email = oTable.cell(rowIdx, colMappings.email).data();
                     var comment = oTable.cell(rowIdx, colMappings.comment).data();
+                    var rtp = oTable.cell(rowIdx, colMappings.rtp).data();
 
                     //console.log('index is restored : ' + rowIdx);
                     oTable.cell(rowIdx, colMappings.name).node().innerHTML = name;
@@ -292,6 +305,7 @@ var Agent = function () {
                     oTable.cell(rowIdx, colMappings.phoneNumber).node().innerHTML = phoneNumber;
                     oTable.cell(rowIdx, colMappings.email).node().innerHTML = email;
                     oTable.cell(rowIdx, colMappings.comment).node().innerHTML = comment;
+                    oTable.cell(rowIdx, colMappings.rtp).node().innerHTML = rtp;
                 }
             });
 
@@ -322,6 +336,7 @@ var Agent = function () {
                     obj['phoneNumber'] = oTable.cell(rowIdx, colMappings.phoneNumber).node().childNodes[0].value;
                     obj['email'] = oTable.cell(rowIdx, colMappings.email).node().childNodes[0].value;
                     obj['comment'] = oTable.cell(rowIdx, colMappings.comment).node().childNodes[0].value;
+                    obj['rtp'] = oTable.cell(rowIdx, colMappings.rtp).node().childNodes[0].value;
 
                     data.push(obj);
                 }
@@ -722,6 +737,11 @@ var Agent = function () {
                 credit: {
                     number: true
                 },
+                rtp: {
+                    min: 0,
+                    max: 100,
+                    number: true
+                },
                 email: {
                     email: true,
                     maxlength: 40
@@ -791,6 +811,11 @@ var Agent = function () {
                     number: '必須是整數'
                 },
                 credit: {
+                    number: '必須是整數'
+                },
+                rtp: {
+                    min: '必須大於0',
+                    max: '必須小於100',
                     number: '必須是整數'
                 },
                 

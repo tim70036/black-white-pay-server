@@ -65,7 +65,7 @@ let readHandler = async function (req, res) {
 
     sqlString = `SELECT 
                     U1.account, U1.name, U1.email, U1.phoneNumber, U1.GSCash AS gsCash,
-                    Ag.id, Ag.cash, Ag.credit, Ag.comment, Ag.bindingCode,
+                    Ag.id, Ag.cash, Ag.credit, Ag.comment, Ag.bindingCode, Ag.rtp,
                     AB.totalCash, AB.totalAvail, 
                     S.status, U2.name AS store, 
                     DATE_FORMAT(CONVERT_TZ(Ag.createtime, 'UTC', 'Asia/Shanghai'),'%Y-%m-%d %H:%i:%s ') AS createtime,
@@ -137,6 +137,7 @@ let createHandler = async function (req, res) {
         bindingCode,
         cash,
         credit,
+        rtp,
         phoneNumber,
         email,
         comment
@@ -184,10 +185,10 @@ let createHandler = async function (req, res) {
     // Query for insert into AgentInfo
     let sqlStringInsert2 = `INSERT INTO AgentInfo (
                                 uid, storeId, bindingCode,
-                                cash, credit, comment) 
-                            VALUES ((SELECT id FROM UserAccount WHERE account=?), ?, ?, ?, ?, ?) 
+                                cash, credit, rtp, comment) 
+                            VALUES ((SELECT id FROM UserAccount WHERE account=?), ?, ?, ?, ?, ?, ?) 
                             ;`;
-    values = [account, store.id, bindingCode, cash, credit, comment];
+    values = [account, store.id, bindingCode, cash, credit, rtp, comment];
     sqlStringInsert2 = mysql.format(sqlStringInsert2, values);
 
     // Query for update storeInfo cash and frozenBalance
@@ -264,7 +265,7 @@ let updateHandler = async function (req, res) {
     // Prepare query
     // Query for update all agents
     let sqlStringTmp = `UPDATE AgentInfo 
-                        SET credit=?, comment=?
+                        SET credit=?, comment=?, rtp=?
                         WHERE id=?
                         ;
                         UPDATE UserAccount
@@ -278,7 +279,7 @@ let updateHandler = async function (req, res) {
         let sqlString = mysql.format(tmp, element.id);
         let result = await sqlAsync.query(req.db, sqlString);
         let values = [
-            element.credit, element.comment, element.id, element.name, element.phoneNumber, element.email, result[0].uid
+            element.credit, element.comment, element.rtp, element.id, element.name, element.phoneNumber, element.email, result[0].uid
         ];
         sqlStringUpdate += mysql.format(sqlStringTmp, values);
     }
@@ -534,7 +535,10 @@ function createValidator() {
             .isNumeric({
                 min: -999999999999999, max: 999999999999999
             }).withMessage('信用額度必須是數字'),
-
+        body('rtp')
+            .isNumeric({
+                min: 0, max: 100
+            }).withMessage('返水必須介於0~100'),
         body('phoneNumber')
             .optional({
                 checkFalsy: true
@@ -677,6 +681,10 @@ function updateValidator() {
             .isNumeric({
                 min: -999999999999999, max: 999999999999999
             }).withMessage('信用額度必須是數字'),
+        body('data.*.rtp')
+            .isNumeric({
+                min: 0, max: 100
+            }).withMessage('返水必須介於0~100'),
         body('data.*.email')
             .isLength({
                 min: 0,

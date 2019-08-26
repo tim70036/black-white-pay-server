@@ -53,7 +53,10 @@ router.use(/^\/info\/ad\/.*/, auth.allowRole('store'));
 router.use(/^\/account\/retrieve\/.*/, auth.allowRole('admin', 'store'));
 
 //Authorize game
+router.use(/^\/game\/management\/.*/, auth.allowRole('admin'));
 router.use(/^\/game\/gameList\/.*/, auth.allowRole('store'));
+router.use(/^\/game\/storeReport\/.*/, auth.allowRole('admin', 'store'));
+router.use(/^\/game\/agentReport\/.*/, auth.allowRole('admin', 'store', 'agent'));
 
 // Auth routes
 router.post('/auth/login', auth.loginValidate, auth.login);
@@ -202,7 +205,7 @@ router.post('/account/misc/edit', misc.editValidate,
     }]), misc.edit);
 
 // game management routes
-const { gameList, management } = game;
+const { gameList, management, storeReport, agentReport } = game;
 router.get('/game/gameList/', gameList.render);
 router.get('/game/gameList/read', gameList.read);
 
@@ -210,4 +213,10 @@ router.get('/game/management/', management.render);
 router.post('/game/management/search', management.searchValidate, management.search);
 router.post('/game/management/add', management.addValidate, management.add);
 router.post('/game/management/delete', management.deleteValidate, management.delete);
+
+router.get('/game/storeReport/', storeReport.render);
+router.post('/game/storeReport/search', storeReport.searchValidate, storeReport.search);
+
+router.get('/game/agentReport/', agentReport.render);
+router.post('/game/agentReport/search', agentReport.searchValidate, agentReport.search);
 module.exports = router;
