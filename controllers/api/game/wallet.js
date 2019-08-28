@@ -241,7 +241,6 @@ let takeInAndPlayHandler = async function(req, res, next) {
     // encode requestBody to UrlEncoded form
     const toUrlEncoded = obj => Object.keys(obj).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(obj[k])).join('&');
     const formData = toUrlEncoded(gameLinkRequestBody);
-    let cq9Url = 'http://api.cqgame.games';
     let path = '/gameboy/player/sw/gamelink';
 
     let fetchPayload = {
@@ -249,14 +248,14 @@ let takeInAndPlayHandler = async function(req, res, next) {
         credentials: 'include',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': process.env.API_TOKEN_CQ9,
+            'Authorization': process.env.CQ9_Token,
         },
         body: formData,
     }
 
     let response;
     try {
-        response = await fetch(`${cq9Url}${path}`, fetchPayload);
+        response = await fetch(`${process.env.CQ9_Host}${path}`, fetchPayload);
 
         // Parse to JSON
         response = await response.json();

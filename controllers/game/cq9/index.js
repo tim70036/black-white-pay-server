@@ -163,7 +163,7 @@ let balanceHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${userGameWalletId}] balance[${results[0].balance}]`);
 
-    const resData = { balance: results[0].balance, currency: 'CNY' };
+    const resData = { balance: results[0].balance, currency: 'BLC' };
     return res.json(responseMessage(resData, '0', 'Success'));    
 };
 
@@ -262,7 +262,7 @@ let takeAllHandler = async function(req, res, next) {
             },
             before: userGameWalletInfo.balance,
             balance: 0,
-            currency: 'CNY',
+            currency: 'BLC',
             event: [
                 {
                     mtcode: mtcode,
@@ -305,7 +305,7 @@ let takeAllHandler = async function(req, res, next) {
         // Log
         req.logger.verbose(`user game wallet id[${account}] take all balance[${userGameWalletInfo.balance}] mtcode[${mtcode}]`);
 
-        const resData = { amount: userGameWalletInfo.balance, balance: 0, currency: 'CNY' };
+        const resData = { amount: userGameWalletInfo.balance, balance: 0, currency: 'BLC' };
         return res.json(responseMessage(resData, '0', 'Success'));    
 	}
 	catch (error) {
@@ -386,7 +386,7 @@ let betHandler = async function(req, res, next) {
             },
             before: userGameWalletInfo.balance,
             balance: postBalance,
-            currency: 'CNY',
+            currency: 'BLC',
             event: [
                 {
                     mtcode: mtcode,
@@ -429,7 +429,7 @@ let betHandler = async function(req, res, next) {
         // Log
         req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] bet[${amount}] mtcode[${mtcode}]`);
 
-        const resData = { balance: postBalance, currency: 'CNY' };
+        const resData = { balance: postBalance, currency: 'BLC' };
         return res.json(responseMessage(resData, '0', 'Success'));    
 	}
 	catch (error) {
@@ -510,7 +510,7 @@ let rollOutHandler = async function(req, res, next) {
             },
             before: userGameWalletInfo.balance,
             balance: postBalance,
-            currency: 'CNY',
+            currency: 'BLC',
             event: [
                 {
                     mtcode: mtcode,
@@ -553,7 +553,7 @@ let rollOutHandler = async function(req, res, next) {
         // Log
         req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] rollout[${amount}] mtcode[${mtcode}]`);
 
-        const resData = { balance: postBalance, currency: 'CNY' };
+        const resData = { balance: postBalance, currency: 'BLC' };
         return res.json(responseMessage(resData, '0', 'Success'));   
 	}
 	catch (error) {
@@ -653,7 +653,7 @@ let rollInHandler = async function(req, res, next) {
         },
         before: userGameWalletInfo.balance,
         balance: postBalance,
-        currency: 'CNY',
+        currency: 'BLC',
         event: [
             {
                 mtcode: mtcode,
@@ -708,7 +708,7 @@ let rollInHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] roll in amount[${amount}] profit[${profit}] mtcode[${mtcode}]`);
 
-    const resData = { balance: postBalance, currency: 'CNY' };
+    const resData = { balance: postBalance, currency: 'BLC' };
     return res.json(responseMessage(resData, '0', 'Success'));  
 };
 
@@ -804,7 +804,7 @@ let endRoundHandler = async function(req, res, next) {
             },
             before: userGameWalletInfo.balance,
             balance: postBalance,
-            currency: 'CNY',
+            currency: 'BLC',
             event: [ ...data ]
         }
     }));
@@ -861,7 +861,7 @@ let endRoundHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] endround amount[${amount}] profit[${profit}] mtcode[${mtcodes[0]}]`);
 
-    const resData = { balance: postBalance, currency: 'CNY' };
+    const resData = { balance: postBalance, currency: 'BLC' };
     return res.json(responseMessage(resData, '0', 'Success'));  
 };
 
@@ -963,7 +963,7 @@ let refundHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] balance[${userGameWalletInfo.balance}] refund amount[${amount}] mtcode[${mtcode}]`);
 
-    const resData = { balance: postBalance, currency: 'CNY' };
+    const resData = { balance: postBalance, currency: 'BLC' };
     return res.json(responseMessage(resData, '0', 'Success'));   
 };
 
@@ -1037,7 +1037,7 @@ let debitHandler = async function(req, res, next) {
         },
         before: userGameWalletInfo.balance,
         balance: postBalance,
-        currency: 'CNY',
+        currency: 'BLC',
         event: [
             {
                 mtcode: mtcode,
@@ -1089,7 +1089,7 @@ let debitHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] debit amount[${amount}]  mtcode[${mtcode}]`);
 
-    const resData = { balance: postBalance, currency: 'CNY' };
+    const resData = { balance: postBalance, currency: 'BLC' };
     return res.json(responseMessage(resData, '0', 'Success'));  
 };
 
@@ -1163,7 +1163,7 @@ let creditHandler = async function(req, res, next) {
         },
         before: userGameWalletInfo.balance,
         balance: postBalance,
-        currency: 'CNY',
+        currency: 'BLC',
         event: [
             {
                 mtcode: mtcode,
@@ -1204,7 +1204,7 @@ let creditHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] credit amount[${amount}]  mtcode[${mtcode}]`);
 
-    const resData = { balance: postBalance, currency: 'CNY' };
+    const resData = { balance: postBalance, currency: 'BLC' };
     return res.json(responseMessage(resData, '0', 'Success'));  
 };
 
@@ -1272,7 +1272,7 @@ let payOffHandler = async function(req, res, next) {
         },
         before: userGameWalletInfo.balance,
         balance: postBalance,
-        currency: 'CNY',
+        currency: 'BLC',
         event: [
             {
                 mtcode: mtcode,
@@ -1312,7 +1312,7 @@ let payOffHandler = async function(req, res, next) {
     // Log
     req.logger.verbose(`user game wallet id[${account}] payoff amount[${amount}] mtcode[${mtcode}]`);
 
-    const resData = { balance: postBalance, currency: 'CNY' };
+    const resData = { balance: postBalance, currency: 'BLC' };
     return res.json(responseMessage(resData, '0', 'Success'));  
 };
 
